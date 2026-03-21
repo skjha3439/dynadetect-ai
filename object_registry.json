@@ -1,3 +1,16 @@
 {
-  "objects": ["person", "chair", "bottle", "cup", "phone"]
+  "objects": [
+    "person",
+    "chair",
+    "bottle",
+    "cup",
+    "phone",
+    "apple",
+    "banana",
+    "pen",
+    "id card",
+    "glasses",
+    "notebook",
+    "earphone"
+  ]
 }
