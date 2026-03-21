@@ -1,0 +1,31 @@
+# Environment variables - NEVER push this!
+.env
+
+# Virtual environment
+venv/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Model files (too large for GitHub)
+*.pt
+*.onnx
+*.pth
+
+# Temp files created during detection
+temp_*.jpg
+temp_*.png
+temp_crop.jpg
+
+# Prototypes store
+prototypes/
+
+# VSCode
+.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db
