@@ -208,6 +208,27 @@ def remove_object_by_index(index: int):
         "count": len(objects)
     }
 
+@app.get("/quantum-stats")
+def quantum_stats():
+    """Get quantum optimization statistics"""
+    from quantum_optimizer import quantum_optimizer
+    return {
+        "message": "Quantum-Inspired Optimization Active",
+        "quantum_concepts": [
+            "Quantum Superposition — multiple states evaluated simultaneously",
+            "Quantum Tunneling — escapes local optima in search",
+            "Quantum Annealing — finds global optimum prototype",
+            "Quantum Interference — amplifies correct matches"
+        ],
+        "optimizer_config": {
+            "n_qubits": quantum_optimizer.n_qubits,
+            "temperature": quantum_optimizer.temperature,
+            "cooling_rate": quantum_optimizer.cooling_rate,
+            "n_iterations": quantum_optimizer.n_iterations
+        },
+        "stats": quantum_optimizer.get_optimization_stats()
+    }
+
 
 @app.get("/health")
 def health_check():
