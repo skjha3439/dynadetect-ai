@@ -1,721 +1,712 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
+<meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>DynaDetect AI</title>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+<title>DynaDetect AI — Vision System</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet"/>
 <style>
-  :root {
-    --bg: #0a0a0f;
-    --surface: #13131a;
-    --surface2: #1c1c27;
-    --accent: #00f5a0;
-    --accent2: #00d9f5;
-    --danger: #ff4d6d;
-    --text: #e8e8f0;
-    --muted: #6b6b80;
-    --border: rgba(255,255,255,0.07);
-    --glow: 0 0 30px rgba(0,245,160,0.15);
-  }
-
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'Space Mono', monospace;
-    min-height: 100vh;
-    overflow-x: hidden;
-  }
-
-  /* Background grid */
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background-image:
-      linear-gradient(rgba(0,245,160,0.03) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(0,245,160,0.03) 1px, transparent 1px);
-    background-size: 40px 40px;
-    pointer-events: none;
-    z-index: 0;
-  }
-
-  .container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 24px;
-    position: relative;
-    z-index: 1;
-  }
-
-  /* Header */
-  header {
-    padding: 24px 0;
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-
-  .logo {
-    font-family: 'Syne', sans-serif;
-    font-weight: 800;
-    font-size: 1.5rem;
-    letter-spacing: -0.02em;
-  }
-
-  .logo span {
-    color: var(--accent);
-  }
-
-  .status-badge {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    background: rgba(0,245,160,0.08);
-    border: 1px solid rgba(0,245,160,0.2);
-    padding: 6px 14px;
-    border-radius: 100px;
-    font-size: 0.75rem;
-    color: var(--accent);
-  }
-
-  .status-dot {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: var(--accent);
-    animation: pulse 2s infinite;
-  }
-
-  @keyframes pulse {
-    0%, 100% { opacity: 1; transform: scale(1); }
-    50% { opacity: 0.5; transform: scale(0.8); }
-  }
-
-  /* Hero */
-  .hero {
-    padding: 48px 0 32px;
-    text-align: center;
-  }
-
-  .hero h1 {
-    font-family: 'Syne', sans-serif;
-    font-size: clamp(2.5rem, 6vw, 4.5rem);
-    font-weight: 800;
-    line-height: 1.05;
-    letter-spacing: -0.03em;
-    margin-bottom: 16px;
-  }
-
-  .hero h1 .highlight {
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-
-  .hero p {
-    color: var(--muted);
-    font-size: 0.9rem;
-    max-width: 480px;
-    margin: 0 auto 32px;
-    line-height: 1.7;
-  }
-
-  /* Layer badges */
-  .layers {
-    display: flex;
-    gap: 8px;
-    justify-content: center;
-    flex-wrap: wrap;
-    margin-bottom: 40px;
-  }
-
-  .layer-badge {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    padding: 4px 12px;
-    border-radius: 4px;
-    font-size: 0.7rem;
-    color: var(--muted);
-    transition: all 0.2s;
-  }
-
-  .layer-badge.active {
-    border-color: rgba(0,245,160,0.3);
-    color: var(--accent);
-    background: rgba(0,245,160,0.05);
-  }
-
-  /* Main grid */
-  .main-grid {
-    display: grid;
-    grid-template-columns: 1fr 380px;
-    gap: 20px;
-    margin-bottom: 20px;
-  }
-
-  @media (max-width: 900px) {
-    .main-grid { grid-template-columns: 1fr; }
-  }
-
-  /* Camera panel */
-  .panel {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    overflow: hidden;
-  }
-
-  .panel-header {
-    padding: 16px 20px;
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-
-  .panel-title {
-    font-family: 'Syne', sans-serif;
-    font-weight: 700;
-    font-size: 0.85rem;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-    color: var(--muted);
-  }
-
-  .camera-wrap {
-    position: relative;
-    background: #000;
-    aspect-ratio: 16/9;
-    overflow: hidden;
-  }
-
-  #videoEl {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-  }
-
-  #canvasEl {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-  }
-
-  .camera-placeholder {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 16px;
-    color: var(--muted);
-    font-size: 0.8rem;
-  }
-
-  .camera-icon {
-    width: 64px;
-    height: 64px;
-    border: 2px solid var(--border);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.8rem;
-  }
-
-  /* Scanning animation */
-  .scan-line {
-    position: absolute;
-    left: 0; right: 0;
-    height: 2px;
-    background: linear-gradient(90deg, transparent, var(--accent), transparent);
-    animation: scan 2s linear infinite;
-    opacity: 0;
-    pointer-events: none;
-  }
-
-  .scanning .scan-line { opacity: 1; }
-
-  @keyframes scan {
-    0% { top: 0%; }
-    100% { top: 100%; }
-  }
-
-  /* Corner decorations */
-  .corner {
-    position: absolute;
-    width: 20px;
-    height: 20px;
-    border-color: var(--accent);
-    border-style: solid;
-    opacity: 0;
-    transition: opacity 0.3s;
-  }
-
-  .scanning .corner { opacity: 1; }
-  .corner.tl { top: 12px; left: 12px; border-width: 2px 0 0 2px; }
-  .corner.tr { top: 12px; right: 12px; border-width: 2px 2px 0 0; }
-  .corner.bl { bottom: 12px; left: 12px; border-width: 0 0 2px 2px; }
-  .corner.br { bottom: 12px; right: 12px; border-width: 0 2px 2px 0; }
-
-  /* Controls */
-  .controls {
-    padding: 16px 20px;
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-  }
-
-  .btn {
-    font-family: 'Space Mono', monospace;
-    font-size: 0.78rem;
-    padding: 10px 18px;
-    border-radius: 8px;
-    border: none;
-    cursor: pointer;
-    transition: all 0.2s;
-    font-weight: 700;
-    letter-spacing: 0.03em;
-  }
-
-  .btn-primary {
-    background: var(--accent);
-    color: #000;
-  }
-
-  .btn-primary:hover { background: #00dda0; transform: translateY(-1px); box-shadow: var(--glow); }
-  .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
-
-  .btn-secondary {
-    background: var(--surface2);
-    color: var(--text);
-    border: 1px solid var(--border);
-  }
-
-  .btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
-
-  .btn-danger {
-    background: rgba(255,77,109,0.1);
-    color: var(--danger);
-    border: 1px solid rgba(255,77,109,0.2);
-  }
-
-  .btn-danger:hover { background: rgba(255,77,109,0.2); }
-
-  /* Upload area */
-  .upload-area {
-    margin: 0 20px 16px;
-    border: 2px dashed var(--border);
-    border-radius: 10px;
-    padding: 20px;
-    text-align: center;
-    cursor: pointer;
-    transition: all 0.2s;
-    font-size: 0.78rem;
-    color: var(--muted);
-  }
-
-  .upload-area:hover {
-    border-color: var(--accent);
-    color: var(--accent);
-    background: rgba(0,245,160,0.03);
-  }
-
-  #fileInput { display: none; }
-
-  /* Right panel */
-  .right-panel {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-  }
-
-  /* Add object */
-  .add-object-form {
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-  }
-
-  .input-group {
-    display: flex;
-    gap: 8px;
-  }
-
-  .input-field {
-    flex: 1;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 10px 14px;
-    color: var(--text);
-    font-family: 'Space Mono', monospace;
-    font-size: 0.8rem;
-    outline: none;
-    transition: border-color 0.2s;
-  }
-
-  .input-field:focus { border-color: var(--accent); }
-  .input-field::placeholder { color: var(--muted); }
-
-  /* Object tags */
-  .objects-list {
-    padding: 0 20px 20px;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-  }
-
-  .obj-tag {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    padding: 4px 10px;
-    border-radius: 4px;
-    font-size: 0.7rem;
-    color: var(--muted);
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    animation: fadeIn 0.3s ease;
-  }
-
-  .obj-tag.new {
-    border-color: rgba(0,245,160,0.4);
-    color: var(--accent);
-    background: rgba(0,245,160,0.05);
-  }
-
-  @keyframes fadeIn {
-    from { opacity: 0; transform: scale(0.9); }
-    to { opacity: 1; transform: scale(1); }
-  }
-
-  .remove-tag {
-    cursor: pointer;
-    opacity: 0.5;
-    font-size: 0.65rem;
-  }
-  .remove-tag:hover { opacity: 1; color: var(--danger); }
-
-  /* Results */
-  .results-list {
-    padding: 16px 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    max-height: 300px;
-    overflow-y: auto;
-  }
-
-  .result-item {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 10px 14px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    animation: slideIn 0.3s ease;
-    font-size: 0.78rem;
-  }
-
-  @keyframes slideIn {
-    from { opacity: 0; transform: translateX(10px); }
-    to { opacity: 1; transform: translateX(0); }
-  }
-
-  .result-label {
-    font-family: 'Syne', sans-serif;
-    font-weight: 700;
-    font-size: 0.85rem;
-    color: var(--accent);
-    text-transform: capitalize;
-  }
-
-  .result-meta {
-    display: flex;
-    gap: 8px;
-    align-items: center;
-  }
-
-  .conf-bar-wrap {
-    width: 60px;
-    height: 4px;
-    background: var(--border);
-    border-radius: 2px;
-    overflow: hidden;
-  }
-
-  .conf-bar {
-    height: 100%;
-    background: linear-gradient(90deg, var(--accent), var(--accent2));
-    border-radius: 2px;
-    transition: width 0.5s ease;
-  }
-
-  .conf-text {
-    color: var(--muted);
-    font-size: 0.7rem;
-    min-width: 34px;
-    text-align: right;
-  }
-
-  .no-results {
-    text-align: center;
-    color: var(--muted);
-    font-size: 0.78rem;
-    padding: 24px;
-  }
-
-  /* Stats bar */
-  .stats-bar {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1px;
-    background: var(--border);
-    border-top: 1px solid var(--border);
-  }
-
-  .stat {
-    background: var(--surface);
-    padding: 14px 16px;
-    text-align: center;
-  }
-
-  .stat-val {
-    font-family: 'Syne', sans-serif;
-    font-size: 1.4rem;
-    font-weight: 800;
-    color: var(--accent);
-  }
-
-  .stat-label {
-    font-size: 0.65rem;
-    color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-  }
-
-  /* Processing overlay */
-  .processing {
-    position: absolute;
-    inset: 0;
-    background: rgba(0,0,0,0.7);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
-    font-size: 0.8rem;
-    color: var(--accent);
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.2s;
-    backdrop-filter: blur(4px);
-  }
-
-  .processing.show { opacity: 1; pointer-events: all; }
-
-  .spinner {
-    width: 20px;
-    height: 20px;
-    border: 2px solid rgba(0,245,160,0.2);
-    border-top-color: var(--accent);
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
-  }
-
-  @keyframes spin { to { transform: rotate(360deg); } }
-
-  /* Toast */
-  .toast {
-    position: fixed;
-    bottom: 24px;
-    right: 24px;
-    background: var(--surface2);
-    border: 1px solid var(--accent);
-    border-radius: 10px;
-    padding: 12px 20px;
-    font-size: 0.8rem;
-    color: var(--accent);
-    transform: translateY(80px);
-    opacity: 0;
-    transition: all 0.3s ease;
-    z-index: 1000;
-    max-width: 300px;
-  }
-
-  .toast.show { transform: translateY(0); opacity: 1; }
-  .toast.error { border-color: var(--danger); color: var(--danger); }
-
-  /* API URL config */
-  .api-config {
-    padding: 12px 20px;
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    gap: 8px;
-    align-items: center;
-  }
-
-  .api-label {
-    font-size: 0.7rem;
-    color: var(--muted);
-    white-space: nowrap;
-  }
-
-  /* Scrollbar */
-  ::-webkit-scrollbar { width: 4px; }
-  ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
-
-  /* Detection boxes on canvas */
-  .det-box {
-    position: absolute;
-    border: 2px solid var(--accent);
-    border-radius: 4px;
-    pointer-events: none;
-  }
-
-  footer {
-    text-align: center;
-    padding: 32px 0;
-    color: var(--muted);
-    font-size: 0.7rem;
-    border-top: 1px solid var(--border);
-    margin-top: 20px;
-  }
+:root {
+  --bg:       #03040a;
+  --bg2:      #060c18;
+  --surface:  #0a1628;
+  --surface2: #0f1f35;
+  --card:     #0d1a2e;
+  --cyan:     #00f5ff;
+  --pink:     #ff2d78;
+  --purple:   #9b59f5;
+  --green:    #00ff88;
+  --white:    #e8f4ff;
+  --muted:    #4a6a8a;
+  --border:   rgba(0,245,255,0.12);
+  --glow-c:   0 0 20px rgba(0,245,255,0.4);
+  --glow-p:   0 0 20px rgba(255,45,120,0.4);
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  background: var(--bg);
+  color: var(--white);
+  font-family: 'Rajdhani', sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+  cursor: crosshair;
+}
+
+.bg-canvas { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background-image:
+    linear-gradient(rgba(0,245,255,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,245,255,0.03) 1px, transparent 1px);
+  background-size: 60px 60px;
+  animation: gridMove 20s linear infinite;
+  z-index: 0;
+}
+
+@keyframes gridMove {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(60px); }
+}
+
+.container {
+  max-width: 1300px;
+  margin: 0 auto;
+  padding: 0 20px;
+  position: relative;
+  z-index: 1;
+}
+
+header {
+  padding: 16px 0;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+}
+
+header::after {
+  content: '';
+  position: absolute;
+  bottom: -1px; left: 0;
+  height: 1px;
+  background: linear-gradient(90deg, var(--cyan), transparent);
+  animation: scanHeader 3s ease-in-out infinite;
+}
+
+@keyframes scanHeader {
+  0%, 100% { width: 100px; opacity: 0.5; }
+  50% { width: 400px; opacity: 1; }
+}
+
+.logo {
+  font-family: 'Orbitron', monospace;
+  font-weight: 900;
+  font-size: 1.4rem;
+  letter-spacing: 0.1em;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logo-icon {
+  width: 36px; height: 36px;
+  border: 2px solid var(--cyan);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.1rem;
+  animation: iconPulse 2s ease-in-out infinite;
+}
+
+@keyframes iconPulse {
+  0%, 100% { box-shadow: 0 0 10px rgba(0,245,255,0.4); }
+  50% { box-shadow: 0 0 25px rgba(0,245,255,0.8), 0 0 50px rgba(0,245,255,0.3); }
+}
+
+.logo span.c { color: var(--cyan); }
+.logo span.p { color: var(--pink); }
+
+.nav-pills { display: flex; gap: 8px; align-items: center; }
+
+.nav-pill {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.7rem;
+  padding: 5px 12px;
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  color: var(--muted);
+  letter-spacing: 0.05em;
+}
+
+.nav-pill.active {
+  border-color: var(--cyan);
+  color: var(--cyan);
+  background: rgba(0,245,255,0.05);
+  box-shadow: var(--glow-c);
+}
+
+.status-hud { display: flex; align-items: center; gap: 10px; font-family: 'Share Tech Mono', monospace; font-size: 0.72rem; }
+.hud-item { display: flex; align-items: center; gap: 5px; color: var(--muted); }
+
+.hud-dot {
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: var(--green);
+  animation: blink 1.5s infinite;
+}
+
+.hud-dot.offline { background: var(--pink); }
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.2; }
+}
+
+.hero { padding: 30px 0 20px; text-align: center; position: relative; }
+
+.hero-title {
+  font-family: 'Orbitron', monospace;
+  font-size: clamp(2rem, 5vw, 3.8rem);
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  line-height: 1.1;
+  margin-bottom: 10px;
+  position: relative;
+}
+
+.hero-title .line1 { color: var(--white); }
+.hero-title .line2 {
+  background: linear-gradient(90deg, var(--cyan), var(--purple), var(--pink));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: gradientShift 4s ease-in-out infinite;
+  background-size: 200% auto;
+}
+
+@keyframes gradientShift {
+  0% { background-position: 0% center; }
+  50% { background-position: 100% center; }
+  100% { background-position: 0% center; }
+}
+
+.hero-title::before {
+  content: 'VISION SYSTEM ONLINE';
+  position: absolute;
+  top: -20px; left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.6rem;
+  font-family: 'Share Tech Mono', monospace;
+  color: var(--cyan);
+  letter-spacing: 0.3em;
+  opacity: 0.6;
+  animation: textFlicker 3s infinite;
+  white-space: nowrap;
+}
+
+@keyframes textFlicker {
+  0%, 95%, 100% { opacity: 0.6; }
+  96% { opacity: 0; }
+  97% { opacity: 0.6; }
+  98% { opacity: 0; }
+}
+
+.hero-sub { font-size: 1rem; color: var(--muted); letter-spacing: 0.05em; margin-bottom: 20px; }
+
+.layer-strip { display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; margin-bottom: 24px; }
+
+.layer-chip {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.65rem;
+  padding: 3px 10px;
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  color: var(--muted);
+  letter-spacing: 0.05em;
+  position: relative;
+  overflow: hidden;
+}
+
+.layer-chip::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 2px; background: var(--cyan); opacity: 0;
+}
+
+.layer-chip.on { border-color: rgba(0,245,255,0.3); color: var(--cyan); background: rgba(0,245,255,0.04); }
+.layer-chip.on::before { opacity: 1; }
+
+.main-grid {
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+@media(max-width:900px) { .main-grid { grid-template-columns: 1fr; } }
+
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative;
+}
+
+.panel::before, .panel::after {
+  content: '';
+  position: absolute;
+  width: 12px; height: 12px;
+  border-color: var(--cyan); border-style: solid;
+  opacity: 0.6; z-index: 2; pointer-events: none;
+}
+
+.panel::before { top: 0; left: 0; border-width: 2px 0 0 2px; }
+.panel::after  { bottom: 0; right: 0; border-width: 0 2px 2px 0; }
+
+.panel-header {
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  background: var(--surface2); position: relative;
+}
+
+.panel-header::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0;
+  height: 1px; width: 60%;
+  background: linear-gradient(90deg, var(--cyan), transparent);
+}
+
+.panel-title {
+  font-family: 'Orbitron', monospace;
+  font-size: 0.65rem; font-weight: 700;
+  letter-spacing: 0.15em; color: var(--cyan); text-transform: uppercase;
+}
+
+.camera-wrap {
+  position: relative; background: #000;
+  aspect-ratio: 16/9; overflow: hidden;
+}
+
+#videoEl { width: 100%; height: 100%; object-fit: cover; display: none; }
+#canvasEl { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+
+.scanlines {
+  position: absolute; inset: 0;
+  background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.15) 2px, rgba(0,0,0,0.15) 4px);
+  pointer-events: none; z-index: 3;
+}
+
+.hud-corner {
+  position: absolute; width: 24px; height: 24px;
+  border-color: var(--cyan); border-style: solid;
+  opacity: 0; transition: opacity 0.3s; z-index: 4;
+}
+
+.camera-wrap.active .hud-corner { opacity: 1; }
+.hud-corner.tl { top: 10px; left: 10px; border-width: 2px 0 0 2px; }
+.hud-corner.tr { top: 10px; right: 10px; border-width: 2px 2px 0 0; }
+.hud-corner.bl { bottom: 10px; left: 10px; border-width: 0 0 2px 2px; }
+.hud-corner.br { bottom: 10px; right: 10px; border-width: 0 2px 2px 0; }
+
+.scan-beam {
+  position: absolute; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, transparent, var(--cyan), var(--pink), transparent);
+  box-shadow: 0 0 10px var(--cyan);
+  animation: beamScan 2.5s linear infinite;
+  opacity: 0; z-index: 4;
+}
+
+.camera-wrap.active .scan-beam { opacity: 1; }
+@keyframes beamScan { 0% { top: 0%; } 100% { top: 100%; } }
+
+.cam-placeholder {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 16px;
+}
+
+.cam-circle {
+  width: 80px; height: 80px;
+  border: 2px solid var(--cyan); border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 2rem;
+  box-shadow: var(--glow-c), inset 0 0 20px rgba(0,245,255,0.1);
+  animation: iconPulse 2s infinite; position: relative;
+}
+
+.cam-circle::before {
+  content: '';
+  position: absolute; inset: -8px;
+  border: 1px solid rgba(0,245,255,0.2); border-radius: 50%;
+  animation: ringExpand 2s ease-out infinite;
+}
+
+@keyframes ringExpand {
+  0% { transform: scale(1); opacity: 0.5; }
+  100% { transform: scale(1.5); opacity: 0; }
+}
+
+.cam-placeholder p {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.75rem; color: var(--muted); letter-spacing: 0.1em;
+}
+
+.processing {
+  position: absolute; inset: 0;
+  background: rgba(3,4,10,0.8);
+  display: flex; align-items: center; justify-content: center;
+  gap: 14px; z-index: 10;
+  opacity: 0; pointer-events: none; transition: opacity 0.2s;
+  backdrop-filter: blur(4px);
+}
+
+.processing.show { opacity: 1; pointer-events: all; }
+
+.proc-ring {
+  width: 28px; height: 28px;
+  border: 2px solid transparent;
+  border-top-color: var(--cyan); border-right-color: var(--pink);
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.processing span {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.75rem; color: var(--cyan); letter-spacing: 0.1em;
+}
+
+.api-bar {
+  padding: 8px 16px; border-bottom: 1px solid var(--border);
+  display: flex; gap: 8px; align-items: center; background: var(--bg2);
+}
+
+.api-label { font-family: 'Share Tech Mono', monospace; font-size: 0.65rem; color: var(--muted); white-space: nowrap; }
+
+.input-field {
+  flex: 1; background: var(--surface2);
+  border: 1px solid var(--border); border-radius: 2px;
+  padding: 6px 10px; color: var(--cyan);
+  font-family: 'Share Tech Mono', monospace; font-size: 0.72rem;
+  outline: none; transition: border-color 0.2s;
+}
+
+.input-field:focus { border-color: var(--cyan); box-shadow: var(--glow-c); }
+.input-field::placeholder { color: var(--muted); }
+
+.upload-zone {
+  margin: 10px 16px;
+  border: 1px dashed rgba(0,245,255,0.2); border-radius: 3px;
+  padding: 14px; text-align: center; cursor: pointer;
+  transition: all 0.3s;
+  font-family: 'Share Tech Mono', monospace; font-size: 0.7rem;
+  color: var(--muted); letter-spacing: 0.05em;
+}
+
+.upload-zone:hover { border-color: var(--cyan); color: var(--cyan); background: rgba(0,245,255,0.03); }
+#fileInput { display: none; }
+
+.controls { padding: 10px 16px; display: flex; gap: 8px; flex-wrap: wrap; }
+
+.btn {
+  font-family: 'Orbitron', monospace;
+  font-size: 0.6rem; font-weight: 700;
+  padding: 8px 16px; border-radius: 2px; border: none;
+  cursor: pointer; transition: all 0.2s;
+  letter-spacing: 0.1em; text-transform: uppercase;
+}
+
+.btn-cyan {
+  background: linear-gradient(135deg, rgba(0,245,255,0.15), rgba(0,245,255,0.05));
+  color: var(--cyan); border: 1px solid rgba(0,245,255,0.4);
+}
+
+.btn-cyan:hover { box-shadow: var(--glow-c); transform: translateY(-1px); border-color: var(--cyan); }
+.btn-cyan:disabled { opacity: 0.3; cursor: not-allowed; transform: none; }
+
+.btn-pink {
+  background: linear-gradient(135deg, rgba(255,45,120,0.15), rgba(255,45,120,0.05));
+  color: var(--pink); border: 1px solid rgba(255,45,120,0.4);
+}
+
+.btn-pink:hover { box-shadow: var(--glow-p); transform: translateY(-1px); }
+.btn-ghost { background: transparent; color: var(--muted); border: 1px solid var(--border); }
+.btn-ghost:hover { border-color: var(--cyan); color: var(--cyan); }
+
+.stats-bar {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 1px; background: var(--border); border-top: 1px solid var(--border);
+}
+
+.stat { background: var(--surface2); padding: 12px 16px; text-align: center; }
+
+.stat-val {
+  font-family: 'Orbitron', monospace; font-size: 1.6rem; font-weight: 900;
+  color: var(--cyan); text-shadow: 0 0 20px rgba(0,245,255,0.5);
+}
+
+.stat-label {
+  font-family: 'Share Tech Mono', monospace; font-size: 0.6rem;
+  color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase;
+}
+
+.right-col { display: flex; flex-direction: column; gap: 14px; }
+.obj-form { padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+.input-row { display: flex; gap: 8px; }
+
+.hint-text {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.62rem; color: var(--muted); letter-spacing: 0.03em; line-height: 1.5;
+}
+
+.obj-list-header {
+  padding: 6px 16px 4px;
+  display: flex; justify-content: space-between; align-items: center;
+}
+
+.obj-list-label {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.6rem; color: var(--muted); letter-spacing: 0.1em;
+}
+
+.obj-list {
+  padding: 0 12px 12px;
+  display: flex; flex-direction: column; gap: 4px;
+  max-height: 200px; overflow-y: auto;
+}
+
+.obj-row {
+  display: flex; align-items: center; gap: 8px;
+  padding: 6px 10px; background: var(--surface2);
+  border: 1px solid var(--border); border-radius: 2px;
+  animation: rowIn 0.3s ease; transition: all 0.2s; position: relative; overflow: hidden;
+}
+
+.obj-row::before {
+  content: '';
+  position: absolute; left: 0; top: 0; bottom: 0;
+  width: 2px; background: var(--cyan); opacity: 0; transition: opacity 0.2s;
+}
+
+.obj-row:hover { border-color: rgba(0,245,255,0.3); }
+.obj-row:hover::before { opacity: 1; }
+.obj-row.new { border-color: rgba(0,245,255,0.5); animation: rowGlow 1s ease; }
+
+@keyframes rowIn { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
+@keyframes rowGlow { 0%, 100% { box-shadow: none; } 50% { box-shadow: 0 0 15px rgba(0,245,255,0.3); } }
+
+.obj-idx {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.6rem; color: var(--muted); min-width: 18px;
+  text-align: center; background: var(--bg); padding: 1px 4px; border-radius: 2px;
+}
+
+.obj-name { flex: 1; font-size: 0.85rem; font-weight: 600; color: var(--white); text-transform: capitalize; }
+
+.obj-del {
+  background: none; border: none; color: var(--muted); cursor: pointer;
+  font-family: 'Share Tech Mono', monospace; font-size: 0.6rem;
+  padding: 2px 6px; border-radius: 2px; transition: all 0.2s;
+}
+
+.obj-del:hover { background: rgba(255,45,120,0.15); color: var(--pink); }
+
+.results-list {
+  padding: 12px; display: flex; flex-direction: column;
+  gap: 6px; max-height: 260px; overflow-y: auto;
+}
+
+.result-card {
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 2px; padding: 8px 12px;
+  display: flex; align-items: center; justify-content: space-between;
+  animation: resultIn 0.3s ease; position: relative; overflow: hidden;
+}
+
+.result-card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 2px; }
+.result-card.yolo::before { background: var(--cyan); }
+.result-card.dino::before { background: var(--purple); }
+
+@keyframes resultIn { from { opacity: 0; transform: translateX(8px); } to { opacity: 1; transform: translateX(0); } }
+
+.result-left { display: flex; flex-direction: column; gap: 2px; }
+
+.result-name {
+  font-family: 'Orbitron', monospace; font-size: 0.72rem; font-weight: 700; text-transform: capitalize;
+}
+
+.result-card.yolo .result-name { color: var(--cyan); }
+.result-card.dino .result-name { color: var(--purple); }
+.result-tag { font-family: 'Share Tech Mono', monospace; font-size: 0.55rem; color: var(--muted); }
+
+.result-right { display: flex; align-items: center; }
+
+.conf-ring { width: 36px; height: 36px; position: relative; }
+.conf-ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+.conf-ring circle { fill: none; stroke-width: 3; stroke-linecap: round; }
+.conf-ring .bg-ring { stroke: var(--surface); }
+.conf-ring .fg-ring { stroke: var(--cyan); }
+.result-card.dino .conf-ring .fg-ring { stroke: var(--purple); }
+
+.conf-pct {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Orbitron', monospace; font-size: 0.55rem; font-weight: 700; color: var(--white);
+}
+
+.no-result {
+  text-align: center; color: var(--muted);
+  font-family: 'Share Tech Mono', monospace; font-size: 0.72rem; padding: 24px; letter-spacing: 0.05em;
+}
+
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(0,245,255,0.2); border-radius: 2px; }
+
+.toast {
+  position: fixed; bottom: 20px; right: 20px;
+  background: var(--surface2); border: 1px solid var(--cyan);
+  border-radius: 3px; padding: 10px 18px;
+  font-family: 'Share Tech Mono', monospace; font-size: 0.72rem; color: var(--cyan);
+  transform: translateY(60px); opacity: 0;
+  transition: all 0.3s; z-index: 1000;
+  box-shadow: var(--glow-c); letter-spacing: 0.05em;
+}
+
+.toast.show { transform: translateY(0); opacity: 1; }
+.toast.err { border-color: var(--pink); color: var(--pink); box-shadow: var(--glow-p); }
+
+footer {
+  text-align: center; padding: 20px 0;
+  border-top: 1px solid var(--border); margin-top: 16px;
+  font-family: 'Share Tech Mono', monospace; font-size: 0.62rem;
+  color: var(--muted); letter-spacing: 0.08em;
+}
 </style>
 </head>
 <body>
 
+<canvas class="bg-canvas" id="bgCanvas"></canvas>
+
 <div class="container">
-  <!-- Header -->
+
   <header>
-    <div class="logo">Dyna<span>Detect</span> AI</div>
-    <div class="status-badge">
-      <div class="status-dot"></div>
-      <span id="apiStatus">Connecting...</span>
+    <div class="logo">
+      <div class="logo-icon">👁</div>
+      Dyna<span class="c">Detect</span><span class="p">AI</span>
+    </div>
+    <div class="nav-pills">
+      <div class="nav-pill active">DETECT</div>
+      <div class="nav-pill">REGISTRY</div>
+      <div class="nav-pill">STATS</div>
+    </div>
+    <div class="status-hud">
+      <div class="hud-item">
+        <div class="hud-dot" id="apiDot"></div>
+        <span id="apiStatus" style="font-size:0.65rem;color:var(--muted)">CONNECTING...</span>
+      </div>
     </div>
   </header>
 
-  <!-- Hero -->
   <div class="hero">
-    <h1>Zero-Shot<br/><span class="highlight">Object Detection</span></h1>
-    <p>Add new objects by name — no retraining needed. Powered by YOLOv8 + CLIP + FAISS.</p>
-    <div class="layers" id="layerBadges">
-      <div class="layer-badge active">L1: YOLOv8</div>
-      <div class="layer-badge active">L2: CLIP</div>
-      <div class="layer-badge active">L3: EWC+Replay</div>
-      <div class="layer-badge active">L4: FAISS</div>
-      <div class="layer-badge active">L5: Continual</div>
-      <div class="layer-badge">L6: SAM</div>
-      <div class="layer-badge active">L7: FastAPI</div>
+    <div class="hero-title">
+      <div class="line1">ZERO-SHOT</div>
+      <div class="line2">OBJECT DETECTION</div>
+    </div>
+    <p class="hero-sub">Add any object — detect instantly — no retraining required</p>
+    <div class="layer-strip">
+      <div class="layer-chip on">L1A · YOLOV8</div>
+      <div class="layer-chip on">L1B · GROUNDING DINO</div>
+      <div class="layer-chip on">L2 · CLIP</div>
+      <div class="layer-chip on">L3 · EWC+REPLAY</div>
+      <div class="layer-chip on">L4 · FAISS</div>
+      <div class="layer-chip on">L5 · CONTINUAL</div>
+      <div class="layer-chip on">L6 · SAM</div>
+      <div class="layer-chip on">L7 · FASTAPI</div>
     </div>
   </div>
 
-  <!-- Main Grid -->
   <div class="main-grid">
 
-    <!-- Camera Panel -->
     <div class="panel">
       <div class="panel-header">
-        <span class="panel-title">📷 Camera / Image Input</span>
-        <span id="modeLabel" style="font-size:0.7rem;color:var(--muted)">No input</span>
+        <span class="panel-title">◈ VISION INPUT</span>
+        <span id="modeLabel" style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--muted)">STANDBY</span>
       </div>
 
-      <!-- API URL config -->
-      <div class="api-config">
-        <span class="api-label">API:</span>
-        <input class="input-field" id="apiUrl" value="http://127.0.0.1:8000" style="font-size:0.7rem;padding:6px 10px;"/>
-        <button class="btn btn-secondary" style="padding:6px 12px;font-size:0.7rem;" onclick="checkAPI()">Connect</button>
+      <div class="api-bar">
+        <span class="api-label">◉ API ENDPOINT</span>
+        <input class="input-field" id="apiUrl" value="https://friendless-sky-inventable.ngrok-free.dev" style="max-width:320px"/>
+        <button class="btn btn-cyan" style="padding:6px 12px;font-size:0.55rem;" onclick="checkAPI()">SYNC</button>
       </div>
 
       <div class="camera-wrap" id="cameraWrap">
-        <video id="videoEl" autoplay playsinline muted style="display:none;"></video>
+        <div class="scanlines"></div>
+        <video id="videoEl" autoplay playsinline muted></video>
         <canvas id="canvasEl"></canvas>
-        <div class="scan-line"></div>
-        <div class="corner tl"></div>
-        <div class="corner tr"></div>
-        <div class="corner bl"></div>
-        <div class="corner br"></div>
-        <div class="camera-placeholder" id="placeholder">
-          <div class="camera-icon">📷</div>
-          <div>Start camera or upload an image</div>
+        <div class="scan-beam"></div>
+        <div class="hud-corner tl"></div>
+        <div class="hud-corner tr"></div>
+        <div class="hud-corner bl"></div>
+        <div class="hud-corner br"></div>
+        <div class="cam-placeholder" id="placeholder">
+          <div class="cam-circle">👁</div>
+          <p>INITIALIZE CAMERA OR UPLOAD IMAGE</p>
         </div>
         <div class="processing" id="processing">
-          <div class="spinner"></div>
-          <span>Detecting objects...</span>
+          <div class="proc-ring"></div>
+          <span>ANALYZING TARGET...</span>
         </div>
       </div>
 
-      <!-- Upload -->
-      <div class="upload-area" onclick="document.getElementById('fileInput').click()">
-        📁 Click to upload an image — or use camera below
+      <div class="upload-zone" onclick="document.getElementById('fileInput').click()">
+        ⟁ DROP IMAGE FILE OR CLICK TO UPLOAD
         <input type="file" id="fileInput" accept="image/*" onchange="handleFileUpload(event)"/>
       </div>
 
       <div class="controls">
-        <button class="btn btn-primary" id="startCamBtn" onclick="startCamera()">▶ Start Camera</button>
-        <button class="btn btn-secondary" id="captureBtn" onclick="captureAndDetect()" disabled>📸 Capture & Detect</button>
-        <button class="btn btn-secondary" id="autoBtn" onclick="toggleAuto()" disabled>🔄 Auto Detect</button>
-        <button class="btn btn-danger" id="stopBtn" onclick="stopCamera()" style="display:none">■ Stop</button>
+        <button class="btn btn-cyan" id="startBtn" onclick="startCamera()">▶ INIT CAM</button>
+        <button class="btn btn-ghost" id="captureBtn" onclick="captureAndDetect()" disabled>◎ CAPTURE</button>
+        <button class="btn btn-ghost" id="autoBtn" onclick="toggleAuto()" disabled>⟳ AUTO</button>
+        <button class="btn btn-pink" id="stopBtn" onclick="stopCamera()" style="display:none">■ HALT</button>
       </div>
 
-      <!-- Stats -->
       <div class="stats-bar">
         <div class="stat">
           <div class="stat-val" id="totalDetections">0</div>
-          <div class="stat-label">Detections</div>
+          <div class="stat-label">DETECTIONS</div>
         </div>
         <div class="stat">
           <div class="stat-val" id="totalObjects">0</div>
-          <div class="stat-label">Objects</div>
+          <div class="stat-label">TARGETS</div>
         </div>
         <div class="stat">
           <div class="stat-val" id="avgConf">0%</div>
-          <div class="stat-label">Avg Conf</div>
+          <div class="stat-label">AVG CONF</div>
         </div>
       </div>
     </div>
 
-    <!-- Right Panel -->
-    <div class="right-panel">
+    <div class="right-col">
 
-      <!-- Add Object -->
       <div class="panel">
         <div class="panel-header">
-          <span class="panel-title">➕ Add New Object</span>
-          <span style="font-size:0.65rem;color:var(--accent)">No retraining!</span>
+          <span class="panel-title">⊕ TARGET REGISTRY</span>
+          <span style="font-family:'Share Tech Mono',monospace;font-size:0.6rem;color:var(--green)">NO RETRAIN</span>
         </div>
-        <div class="add-object-form">
-          <div class="input-group">
-            <input class="input-field" id="newObjectInput" placeholder="e.g. fire extinguisher" onkeydown="if(event.key==='Enter') addObject()"/>
-            <button class="btn btn-primary" onclick="addObject()">Add</button>
+        <div class="obj-form">
+          <div class="input-row">
+            <input class="input-field" id="newObjInput" placeholder="register new target..."
+              onkeydown="if(event.key==='Enter') addObject()"/>
+            <button class="btn btn-cyan" onclick="addObject()">ADD</button>
           </div>
-          <div style="font-size:0.7rem;color:var(--muted)">Type any object name → instantly detectable via CLIP embedding</div>
+          <p class="hint-text">▸ Type any object name → CLIP encodes → FAISS stores → detectable instantly</p>
         </div>
-        <div class="objects-list" id="objectsList">
-          <!-- tags inserted here -->
+        <div class="obj-list-header">
+          <span class="obj-list-label">◈ REGISTERED TARGETS</span>
+          <button class="btn btn-pink" style="padding:3px 8px;font-size:0.5rem;" onclick="clearAll()">PURGE ALL</button>
+        </div>
+        <div class="obj-list" id="objList">
+          <div class="no-result">NO TARGETS REGISTERED</div>
         </div>
       </div>
 
-      <!-- Results -->
       <div class="panel" style="flex:1">
         <div class="panel-header">
-          <span class="panel-title">🎯 Detections</span>
-          <button class="btn btn-secondary" style="padding:4px 10px;font-size:0.65rem;" onclick="clearResults()">Clear</button>
+          <span class="panel-title">◈ DETECTION LOG</span>
+          <button class="btn btn-ghost" style="padding:3px 8px;font-size:0.5rem;" onclick="clearResults()">CLEAR</button>
         </div>
         <div class="results-list" id="resultsList">
-          <div class="no-results">Run detection to see results</div>
+          <div class="no-result">AWAITING SCAN...</div>
         </div>
       </div>
 
@@ -723,280 +714,343 @@
   </div>
 
   <footer>
-    DynaDetect AI · 7-Layer Incremental Object Detection · IIIT Manipur Hackathon · Akumen AI Problem #2
+    DYNADETECT AI · 7-LAYER INCREMENTAL OBJECT DETECTION · IIIT MANIPUR HACKATHON · AKUMEN AI · 2026
   </footer>
 </div>
 
 <div class="toast" id="toast"></div>
 
 <script>
-  let stream = null;
-  let autoInterval = null;
-  let isAuto = false;
-  let totalDetections = 0;
-  let allConfs = [];
-  let registeredObjects = [];
+// ── Ngrok bypass header ──────────────────────────────────
+const NGROK_HEADERS = { 'ngrok-skip-browser-warning': 'true' };
 
-  const API = () => document.getElementById('apiUrl').value.trim();
-
-  // Check API connection
-  async function checkAPI() {
-    try {
-      const res = await fetch(`${API()}/objects`);
-      const data = await res.json();
-      document.getElementById('apiStatus').textContent = 'API Connected ✓';
-      registeredObjects = data.objects || [];
-      renderObjectTags();
-      document.getElementById('totalObjects').textContent = registeredObjects.length;
-      showToast('Connected to DynaDetect API!');
-    } catch {
-      document.getElementById('apiStatus').textContent = 'API Offline';
-      showToast('Cannot connect to API. Is uvicorn running?', true);
-    }
-  }
-
-  // Start camera
-  async function startCamera() {
-    try {
-      stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' }, audio: false });
-      const video = document.getElementById('videoEl');
-      video.srcObject = stream;
-      video.style.display = 'block';
-      document.getElementById('placeholder').style.display = 'none';
-      document.getElementById('cameraWrap').classList.add('scanning');
-      document.getElementById('captureBtn').disabled = false;
-      document.getElementById('autoBtn').disabled = false;
-      document.getElementById('startCamBtn').style.display = 'none';
-      document.getElementById('stopBtn').style.display = 'inline-block';
-      document.getElementById('modeLabel').textContent = 'Live Camera';
-      showToast('Camera started!');
-    } catch (e) {
-      showToast('Camera access denied. Use image upload instead.', true);
-    }
-  }
-
-  // Stop camera
-  function stopCamera() {
-    if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
-    if (autoInterval) { clearInterval(autoInterval); autoInterval = null; isAuto = false; }
-    document.getElementById('videoEl').style.display = 'none';
-    document.getElementById('placeholder').style.display = 'flex';
-    document.getElementById('cameraWrap').classList.remove('scanning');
-    document.getElementById('captureBtn').disabled = true;
-    document.getElementById('autoBtn').disabled = true;
-    document.getElementById('autoBtn').textContent = '🔄 Auto Detect';
-    document.getElementById('startCamBtn').style.display = 'inline-block';
-    document.getElementById('stopBtn').style.display = 'none';
-    document.getElementById('modeLabel').textContent = 'No input';
-    clearCanvas();
-  }
-
-  // Capture from camera and detect
-  async function captureAndDetect() {
-    const video = document.getElementById('videoEl');
-    const canvas = document.createElement('canvas');
-    canvas.width = video.videoWidth || 640;
-    canvas.height = video.videoHeight || 480;
-    canvas.getContext('2d').drawImage(video, 0, 0);
-    canvas.toBlob(async blob => {
-      await runDetection(blob, canvas.width, canvas.height);
-    }, 'image/jpeg', 0.9);
-  }
-
-  // Handle file upload
-  function handleFileUpload(event) {
-    const file = event.target.files[0];
-    if (!file) return;
-    const url = URL.createObjectURL(file);
-    const img = new Image();
-    img.onload = async () => {
-      const video = document.getElementById('videoEl');
-      video.style.display = 'none';
-      // Draw image on canvas
-      const canvas = document.getElementById('canvasEl');
-      canvas.width = canvas.offsetWidth;
-      canvas.height = canvas.offsetHeight;
-      const ctx = canvas.getContext('2d');
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      // Draw image scaled
-      const scale = Math.min(canvas.width / img.width, canvas.height / img.height);
-      const x = (canvas.width - img.width * scale) / 2;
-      const y = (canvas.height - img.height * scale) / 2;
-      ctx.drawImage(img, x, y, img.width * scale, img.height * scale);
-      document.getElementById('placeholder').style.display = 'none';
-      document.getElementById('modeLabel').textContent = 'Image: ' + file.name;
-      document.getElementById('cameraWrap').classList.add('scanning');
-      await runDetection(file, img.width, img.height);
-    };
-    img.src = url;
-  }
-
-  // Run detection via API
-  async function runDetection(blob, imgW, imgH) {
-    document.getElementById('processing').classList.add('show');
-    try {
-      const formData = new FormData();
-      formData.append('file', blob, 'image.jpg');
-      const res = await fetch(`${API()}/detect`, { method: 'POST', body: formData });
-      const data = await res.json();
-      const detections = data.detections || [];
-      renderResults(detections);
-      drawBoxes(detections, imgW, imgH);
-      totalDetections += detections.length;
-      document.getElementById('totalDetections').textContent = totalDetections;
-      if (detections.length > 0) {
-        const confs = detections.map(d => d.confidence || d.match_score || 0);
-        allConfs.push(...confs);
-        const avg = allConfs.reduce((a,b) => a+b, 0) / allConfs.length;
-        document.getElementById('avgConf').textContent = Math.round(avg * 100) + '%';
+// ── Particles ────────────────────────────────────────────
+(function() {
+  const canvas = document.getElementById('bgCanvas');
+  const ctx = canvas.getContext('2d');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  const particles = Array.from({ length: 60 }, () => ({
+    x: Math.random() * canvas.width,
+    y: Math.random() * canvas.height,
+    r: Math.random() * 1.5 + 0.5,
+    vx: (Math.random() - 0.5) * 0.3,
+    vy: -Math.random() * 0.8 - 0.2,
+    alpha: Math.random(),
+    color: Math.random() > 0.5 ? '#00f5ff' : '#ff2d78'
+  }));
+  function drawParticles() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    particles.forEach(p => {
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = p.color + Math.floor(p.alpha * 255).toString(16).padStart(2,'0');
+      ctx.fill();
+      p.x += p.vx; p.y += p.vy; p.alpha -= 0.002;
+      if (p.y < -10 || p.alpha <= 0) {
+        p.x = Math.random() * canvas.width;
+        p.y = canvas.height + 10;
+        p.alpha = Math.random() * 0.8 + 0.2;
       }
-    } catch {
-      showToast('Detection failed. Check API connection.', true);
-    }
-    document.getElementById('processing').classList.remove('show');
+    });
+    requestAnimationFrame(drawParticles);
   }
+  drawParticles();
+  window.addEventListener('resize', () => {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  });
+})();
 
-  // Draw bounding boxes on canvas
-  function drawBoxes(detections, imgW, imgH) {
+// ── State ────────────────────────────────────────────────
+let stream = null, autoInterval = null, isAuto = false;
+let totalDet = 0, allConfs = [], registeredObjects = [];
+let uploadedImg = null, uploadedScale = 1, uploadedX = 0, uploadedY = 0;
+
+const API = () => document.getElementById('apiUrl').value.trim();
+
+// ── API Check ─────────────────────────────────────────────
+async function checkAPI() {
+  try {
+    const res = await fetch(`${API()}/objects`, {
+      headers: NGROK_HEADERS   // ← bypass ngrok warning
+    });
+    const data = await res.json();
+    document.getElementById('apiStatus').textContent = 'ONLINE';
+    document.getElementById('apiStatus').style.color = 'var(--green)';
+    document.getElementById('apiDot').classList.remove('offline');
+    registeredObjects = data.objects || [];
+    renderObjList();
+    document.getElementById('totalObjects').textContent = registeredObjects.length;
+    showToast('▸ SYSTEM ONLINE — API CONNECTED');
+  } catch {
+    document.getElementById('apiStatus').textContent = 'OFFLINE';
+    document.getElementById('apiStatus').style.color = 'var(--pink)';
+    document.getElementById('apiDot').classList.add('offline');
+    showToast('▸ CONNECTION FAILED', true);
+  }
+}
+
+// ── Camera ───────────────────────────────────────────────
+async function startCamera() {
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' }, audio: false });
+    const v = document.getElementById('videoEl');
+    v.srcObject = stream; v.style.display = 'block';
+    document.getElementById('placeholder').style.display = 'none';
+    document.getElementById('cameraWrap').classList.add('active');
+    document.getElementById('captureBtn').disabled = false;
+    document.getElementById('autoBtn').disabled = false;
+    document.getElementById('startBtn').style.display = 'none';
+    document.getElementById('stopBtn').style.display = 'inline-block';
+    document.getElementById('modeLabel').textContent = 'LIVE FEED';
+    uploadedImg = null;
+    showToast('▸ CAMERA INITIALIZED');
+  } catch { showToast('▸ CAMERA ACCESS DENIED', true); }
+}
+
+function stopCamera() {
+  if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
+  if (autoInterval) { clearInterval(autoInterval); autoInterval = null; isAuto = false; }
+  document.getElementById('videoEl').style.display = 'none';
+  document.getElementById('placeholder').style.display = 'flex';
+  document.getElementById('cameraWrap').classList.remove('active');
+  document.getElementById('captureBtn').disabled = true;
+  document.getElementById('autoBtn').disabled = true;
+  document.getElementById('autoBtn').textContent = '⟳ AUTO';
+  document.getElementById('startBtn').style.display = 'inline-block';
+  document.getElementById('stopBtn').style.display = 'none';
+  document.getElementById('modeLabel').textContent = 'STANDBY';
+  clearCanvas();
+}
+
+async function captureAndDetect() {
+  const v = document.getElementById('videoEl');
+  const c = document.createElement('canvas');
+  c.width = v.videoWidth || 640; c.height = v.videoHeight || 480;
+  c.getContext('2d').drawImage(v, 0, 0);
+  c.toBlob(async b => await runDetection(b, c.width, c.height), 'image/jpeg', 0.92);
+}
+
+function handleFileUpload(e) {
+  const file = e.target.files[0]; if (!file) return;
+  const url = URL.createObjectURL(file);
+  const img = new Image();
+  img.onload = async () => {
+    document.getElementById('videoEl').style.display = 'none';
     const canvas = document.getElementById('canvasEl');
     const wrap = document.getElementById('cameraWrap');
-    canvas.width = wrap.offsetWidth;
-    canvas.height = wrap.offsetHeight;
+    canvas.width = wrap.offsetWidth; canvas.height = wrap.offsetHeight;
     const ctx = canvas.getContext('2d');
+    const scale = Math.min(canvas.width / img.width, canvas.height / img.height);
+    const x = (canvas.width - img.width * scale) / 2;
+    const y = (canvas.height - img.height * scale) / 2;
+    ctx.drawImage(img, x, y, img.width * scale, img.height * scale);
+    uploadedImg = img; uploadedScale = scale; uploadedX = x; uploadedY = y;
+    document.getElementById('placeholder').style.display = 'none';
+    document.getElementById('cameraWrap').classList.add('active');
+    document.getElementById('modeLabel').textContent = file.name.substring(0, 20);
+    await runDetection(file, img.width, img.height);
+  };
+  img.src = url;
+}
 
-    // If camera is active, draw video frame first
-    const video = document.getElementById('videoEl');
-    if (video.style.display !== 'none') {
-      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+async function runDetection(blob, imgW, imgH) {
+  document.getElementById('processing').classList.add('show');
+  try {
+    const fd = new FormData();
+    fd.append('file', blob, 'img.jpg');
+    const res = await fetch(`${API()}/detect`, {
+      method: 'POST',
+      body: fd,
+      headers: NGROK_HEADERS   // ← bypass ngrok warning
+    });
+    const data = await res.json();
+    const dets = data.detections || [];
+    renderResults(dets);
+    drawBoxes(dets, imgW, imgH);
+    totalDet += dets.length;
+    document.getElementById('totalDetections').textContent = totalDet;
+    if (dets.length > 0) {
+      const confs = dets.map(d => d.confidence || d.match_score || 0);
+      allConfs.push(...confs);
+      const avg = allConfs.reduce((a,b) => a+b,0) / allConfs.length;
+      document.getElementById('avgConf').textContent = Math.round(avg*100) + '%';
     }
+  } catch { showToast('▸ DETECTION FAILED', true); }
+  document.getElementById('processing').classList.remove('show');
+}
 
-    const scaleX = canvas.width / (imgW || canvas.width);
-    const scaleY = canvas.height / (imgH || canvas.height);
+function drawBoxes(dets, imgW, imgH) {
+  const canvas = document.getElementById('canvasEl');
+  const wrap = document.getElementById('cameraWrap');
+  canvas.width = wrap.offsetWidth; canvas.height = wrap.offsetHeight;
+  const ctx = canvas.getContext('2d');
+  if (uploadedImg) {
+    ctx.drawImage(uploadedImg, uploadedX, uploadedY,
+      uploadedImg.width * uploadedScale, uploadedImg.height * uploadedScale);
+  }
+  const v = document.getElementById('videoEl');
+  if (v.style.display !== 'none') ctx.drawImage(v, 0, 0, canvas.width, canvas.height);
+  const sx = canvas.width / (imgW || canvas.width);
+  const sy = canvas.height / (imgH || canvas.height);
+  dets.forEach(d => {
+    if (!d.box || d.box.length < 4) return;
+    const [x1,y1,x2,y2] = d.box;
+    const bx = x1*sx, by = y1*sy, bw = (x2-x1)*sx, bh = (y2-y1)*sy;
+    const isDino = d.detector === 'grounding_dino';
+    const color = isDino ? '#9b59f5' : '#00f5ff';
+    ctx.shadowBlur = 12; ctx.shadowColor = color;
+    ctx.strokeStyle = color; ctx.lineWidth = 1.5;
+    ctx.strokeRect(bx, by, bw, bh);
+    const cs = 12; ctx.lineWidth = 2.5;
+    [[bx,by,1,1],[bx+bw,by,-1,1],[bx,by+bh,1,-1],[bx+bw,by+bh,-1,-1]].forEach(([cx,cy,dx,dy]) => {
+      ctx.beginPath(); ctx.moveTo(cx+dx*cs,cy); ctx.lineTo(cx,cy); ctx.lineTo(cx,cy+dy*cs); ctx.stroke();
+    });
+    ctx.shadowBlur = 0;
+    const conf = Math.round((d.confidence || d.match_score || 0)*100);
+    const label = `${d.label} ${conf}%`;
+    ctx.font = 'bold 11px Orbitron, monospace';
+    const tw = ctx.measureText(label).width;
+    ctx.fillStyle = color + 'dd';
+    ctx.fillRect(bx, by - 20, tw + 14, 19);
+    ctx.fillStyle = '#000';
+    ctx.fillText(label, bx + 7, by - 6);
+  });
+}
 
-    detections.forEach(det => {
-      if (!det.box || det.box.length < 4) return;
-      const [x1, y1, x2, y2] = det.box;
-      const bx = x1 * scaleX, by = y1 * scaleY;
-      const bw = (x2 - x1) * scaleX, bh = (y2 - y1) * scaleY;
+function clearCanvas() {
+  const c = document.getElementById('canvasEl');
+  c.getContext('2d').clearRect(0,0,c.width,c.height);
+  uploadedImg = null;
+}
 
-      // Box
-      ctx.strokeStyle = '#00f5a0';
-      ctx.lineWidth = 2;
-      ctx.shadowBlur = 8;
-      ctx.shadowColor = '#00f5a0';
-      ctx.strokeRect(bx, by, bw, bh);
-      ctx.shadowBlur = 0;
+function toggleAuto() {
+  isAuto = !isAuto;
+  const btn = document.getElementById('autoBtn');
+  if (isAuto) {
+    btn.textContent = '⏸ PAUSE'; btn.style.color = 'var(--cyan)';
+    autoInterval = setInterval(captureAndDetect, 2000);
+    showToast('▸ AUTO SCAN ACTIVE — 2S INTERVAL');
+  } else {
+    btn.textContent = '⟳ AUTO'; btn.style.color = '';
+    clearInterval(autoInterval); autoInterval = null;
+  }
+}
 
-      // Label background
-      const label = `${det.label} ${Math.round((det.confidence || det.match_score || 0) * 100)}%`;
-      ctx.font = 'bold 12px Space Mono, monospace';
-      const tw = ctx.measureText(label).width;
-      ctx.fillStyle = '#00f5a0';
-      ctx.fillRect(bx, by - 22, tw + 12, 20);
+// ── Add Object ────────────────────────────────────────────
+async function addObject() {
+  const input = document.getElementById('newObjInput');
+  const name = input.value.trim().toLowerCase(); if (!name) return;
+  try {
+    const res = await fetch(`${API()}/add-object?name=${encodeURIComponent(name)}`, {
+      method: 'POST',
+      headers: NGROK_HEADERS   // ← bypass ngrok warning
+    });
+    const data = await res.json();
+    registeredObjects = data.objects || registeredObjects;
+    renderObjList(name);
+    document.getElementById('totalObjects').textContent = registeredObjects.length;
+    input.value = '';
+    showToast(`▸ TARGET LOCKED: "${name.toUpperCase()}"`);
+  } catch { showToast('▸ REGISTRATION FAILED', true); }
+}
 
-      // Label text
-      ctx.fillStyle = '#000';
-      ctx.fillText(label, bx + 6, by - 7);
+// ── Remove Object ─────────────────────────────────────────
+async function removeObject(idx) {
+  const name = registeredObjects[idx];
+  try {
+    const res = await fetch(`${API()}/remove-object-by-index?index=${idx}`, {
+      method: 'DELETE',
+      headers: NGROK_HEADERS   // ← bypass ngrok warning
+    });
+    const data = await res.json();
+    if (data.error) { showToast(data.error, true); return; }
+    registeredObjects = data.objects || registeredObjects;
+    renderObjList();
+    document.getElementById('totalObjects').textContent = registeredObjects.length;
+    showToast(`▸ TARGET REMOVED: "${name.toUpperCase()}"`);
+  } catch { showToast('▸ REMOVAL FAILED', true); }
+}
+
+// ── Clear All ─────────────────────────────────────────────
+async function clearAll() {
+  if (!confirm('PURGE ALL TARGETS FROM REGISTRY?')) return;
+  for (let i = registeredObjects.length-1; i >= 0; i--) {
+    await fetch(`${API()}/remove-object-by-index?index=${i}`, {
+      method: 'DELETE',
+      headers: NGROK_HEADERS   // ← bypass ngrok warning
     });
   }
+  registeredObjects = []; renderObjList();
+  document.getElementById('totalObjects').textContent = 0;
+  showToast('▸ REGISTRY PURGED');
+}
 
-  function clearCanvas() {
-    const canvas = document.getElementById('canvasEl');
-    canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+// ── Render Objects ────────────────────────────────────────
+function renderObjList(newName=null) {
+  const c = document.getElementById('objList');
+  if (!registeredObjects.length) {
+    c.innerHTML = '<div class="no-result">NO TARGETS REGISTERED</div>'; return;
   }
+  c.innerHTML = registeredObjects.map((o,i) => `
+    <div class="obj-row ${o===newName?'new':''}">
+      <span class="obj-idx">${String(i).padStart(2,'0')}</span>
+      <span class="obj-name">${o}</span>
+      <button class="obj-del" onclick="removeObject(${i})">✕ DEL</button>
+    </div>
+  `).join('');
+}
 
-  // Toggle auto detection
-  function toggleAuto() {
-    isAuto = !isAuto;
-    const btn = document.getElementById('autoBtn');
-    if (isAuto) {
-      btn.textContent = '⏸ Stop Auto';
-      btn.style.color = 'var(--accent)';
-      autoInterval = setInterval(captureAndDetect, 2000);
-      showToast('Auto detect every 2 seconds');
-    } else {
-      btn.textContent = '🔄 Auto Detect';
-      btn.style.color = '';
-      clearInterval(autoInterval);
-      autoInterval = null;
-    }
-  }
-
-  // Add new object
-  async function addObject() {
-    const input = document.getElementById('newObjectInput');
-    const name = input.value.trim().toLowerCase();
-    if (!name) return;
-    try {
-      const res = await fetch(`${API()}/add-object?name=${encodeURIComponent(name)}`, { method: 'POST' });
-      const data = await res.json();
-      registeredObjects = data.objects || registeredObjects;
-      renderObjectTags(name);
-      document.getElementById('totalObjects').textContent = registeredObjects.length;
-      input.value = '';
-      showToast(`'${name}' added — no retraining needed!`);
-    } catch {
-      showToast('Failed to add object. Check API.', true);
-    }
-  }
-
-  // Render object tags
-  function renderObjectTags(newName = null) {
-    const container = document.getElementById('objectsList');
-    container.innerHTML = registeredObjects.map(obj => `
-      <div class="obj-tag ${obj === newName ? 'new' : ''}">
-        ${obj}
-      </div>
-    `).join('');
-  }
-
-  // Render detection results
-  function renderResults(detections) {
-    const container = document.getElementById('resultsList');
-    if (!detections.length) {
-      container.innerHTML = '<div class="no-results">No objects detected</div>';
-      return;
-    }
-    container.innerHTML = detections.map(d => {
-      const conf = d.confidence || d.match_score || 0;
-      return `
-        <div class="result-item">
-          <div class="result-label">${d.label || 'unknown'}</div>
-          <div class="result-meta">
-            <div class="conf-bar-wrap">
-              <div class="conf-bar" style="width:${conf*100}%"></div>
-            </div>
-            <span class="conf-text">${Math.round(conf*100)}%</span>
+// ── Render Results ────────────────────────────────────────
+function renderResults(dets) {
+  const c = document.getElementById('resultsList');
+  if (!dets.length) { c.innerHTML = '<div class="no-result">NO TARGETS DETECTED</div>'; return; }
+  c.innerHTML = dets.map(d => {
+    const conf = Math.round((d.confidence||d.match_score||0)*100);
+    const isDino = d.detector === 'grounding_dino';
+    const r = 15, circ = 2*Math.PI*r;
+    const offset = circ - (conf/100)*circ;
+    return `
+      <div class="result-card ${isDino?'dino':'yolo'}">
+        <div class="result-left">
+          <span class="result-name">${d.label||'unknown'}</span>
+          <span class="result-tag">${isDino?'◈ GROUNDING DINO':'◈ YOLOV8'}</span>
+        </div>
+        <div class="result-right">
+          <div class="conf-ring">
+            <svg viewBox="0 0 40 40">
+              <circle class="bg-ring" cx="20" cy="20" r="${r}" stroke-dasharray="${circ}"/>
+              <circle class="fg-ring" cx="20" cy="20" r="${r}" stroke-dasharray="${circ}" stroke-dashoffset="${offset}"/>
+            </svg>
+            <div class="conf-pct">${conf}%</div>
           </div>
         </div>
-      `;
-    }).join('');
-  }
+      </div>
+    `;
+  }).join('');
+}
 
-  function clearResults() {
-    document.getElementById('resultsList').innerHTML = '<div class="no-results">Run detection to see results</div>';
-    clearCanvas();
-  }
+function clearResults() {
+  document.getElementById('resultsList').innerHTML = '<div class="no-result">AWAITING SCAN...</div>';
+  clearCanvas();
+}
 
-  // Toast notification
-  function showToast(msg, isError = false) {
-    const toast = document.getElementById('toast');
-    toast.textContent = msg;
-    toast.className = 'toast show' + (isError ? ' error' : '');
-    setTimeout(() => toast.className = 'toast', 3000);
-  }
+function showToast(msg, err=false) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show' + (err?' err':'');
+  setTimeout(() => t.className='toast', 3000);
+}
 
-  // Init
-  window.onload = () => {
-    checkAPI();
-    // Resize canvas on window resize
-    window.addEventListener('resize', () => {
-      const canvas = document.getElementById('canvasEl');
-      const wrap = document.getElementById('cameraWrap');
-      canvas.width = wrap.offsetWidth;
-      canvas.height = wrap.offsetHeight;
-    });
-  };
+window.onload = () => {
+  checkAPI();
+  window.addEventListener('resize', () => {
+    const c = document.getElementById('canvasEl');
+    const w = document.getElementById('cameraWrap');
+    c.width = w.offsetWidth; c.height = w.offsetHeight;
+  });
+};
 </script>
 </body>
 </html>
