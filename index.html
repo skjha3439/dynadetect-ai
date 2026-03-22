@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>DynaDetect AI — Vision System</title>
+<title>DynaDetect AI — Hidden Leaf Vision System</title>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet"/>
 <style>
 :root {
@@ -11,16 +11,21 @@
   --bg2:      #060c18;
   --surface:  #0a1628;
   --surface2: #0f1f35;
-  --card:     #0d1a2e;
   --cyan:     #00f5ff;
   --pink:     #ff2d78;
   --purple:   #9b59f5;
+  --orange:   #ff6b00;
+  --gold:     #ffd700;
+  --red:      #cc0000;
   --green:    #00ff88;
+  --leaf:     #2d5a1b;
+  --leaf2:    #4a8c2a;
   --white:    #e8f4ff;
   --muted:    #4a6a8a;
   --border:   rgba(0,245,255,0.12);
   --glow-c:   0 0 20px rgba(0,245,255,0.4);
-  --glow-p:   0 0 20px rgba(255,45,120,0.4);
+  --glow-o:   0 0 20px rgba(255,107,0,0.5);
+  --glow-r:   0 0 20px rgba(204,0,0,0.6);
 }
 
 * { margin:0; padding:0; box-sizing:border-box; }
@@ -36,12 +41,13 @@ body {
 
 .bg-canvas { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
 
+/* Subtle grid */
 body::before {
   content: '';
   position: fixed; inset: 0;
   background-image:
-    linear-gradient(rgba(0,245,255,0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0,245,255,0.03) 1px, transparent 1px);
+    linear-gradient(rgba(0,245,255,0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,245,255,0.02) 1px, transparent 1px);
   background-size: 60px 60px;
   animation: gridMove 20s linear infinite;
   z-index: 0;
@@ -60,9 +66,32 @@ body::before {
   z-index: 1;
 }
 
+/* ── SHARINGAN EYE SVG ─────────────────────────── */
+.sharingan {
+  width: 40px; height: 40px;
+  position: relative;
+  animation: sharinganSpin 4s linear infinite;
+  filter: drop-shadow(0 0 8px rgba(204,0,0,0.8));
+}
+
+@keyframes sharinganSpin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.sharingan-pulse {
+  animation: sharinganSpin 4s linear infinite, sharinganGlow 2s ease-in-out infinite;
+}
+
+@keyframes sharinganGlow {
+  0%, 100% { filter: drop-shadow(0 0 8px rgba(204,0,0,0.8)); }
+  50% { filter: drop-shadow(0 0 20px rgba(204,0,0,1)) drop-shadow(0 0 40px rgba(255,0,0,0.5)); }
+}
+
+/* ── HEADER ─────────────────────────────────────── */
 header {
   padding: 16px 0;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid rgba(255,107,0,0.2);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -74,78 +103,66 @@ header::after {
   position: absolute;
   bottom: -1px; left: 0;
   height: 1px;
-  background: linear-gradient(90deg, var(--cyan), transparent);
+  background: linear-gradient(90deg, var(--orange), var(--red), transparent);
   animation: scanHeader 3s ease-in-out infinite;
 }
 
 @keyframes scanHeader {
-  0%, 100% { width: 100px; opacity: 0.5; }
-  50% { width: 400px; opacity: 1; }
+  0%, 100% { width: 150px; opacity: 0.6; }
+  50% { width: 500px; opacity: 1; }
 }
 
 .logo {
   font-family: 'Orbitron', monospace;
   font-weight: 900;
-  font-size: 1.4rem;
-  letter-spacing: 0.1em;
+  font-size: 1.3rem;
+  letter-spacing: 0.08em;
   display: flex;
   align-items: center;
   gap: 12px;
 }
 
-.logo-icon {
-  width: 36px; height: 36px;
-  border: 2px solid var(--cyan);
-  border-radius: 8px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 1.1rem;
-  animation: iconPulse 2s ease-in-out infinite;
+.logo span.o { color: var(--orange); }
+.logo span.r { color: var(--red); }
+
+/* Headband decoration */
+.headband {
+  display: flex; align-items: center; gap: 6px;
 }
 
-@keyframes iconPulse {
-  0%, 100% { box-shadow: 0 0 10px rgba(0,245,255,0.4); }
-  50% { box-shadow: 0 0 25px rgba(0,245,255,0.8), 0 0 50px rgba(0,245,255,0.3); }
+.headband-line {
+  width: 30px; height: 2px;
+  background: linear-gradient(90deg, var(--orange), var(--gold));
 }
 
-.logo span.c { color: var(--cyan); }
-.logo span.p { color: var(--pink); }
-
-.nav-pills { display: flex; gap: 8px; align-items: center; }
-
-.nav-pill {
-  font-family: 'Share Tech Mono', monospace;
+.headband-symbol {
   font-size: 0.7rem;
-  padding: 5px 12px;
-  border: 1px solid var(--border);
+  color: var(--gold);
+  font-family: 'Share Tech Mono', monospace;
+  letter-spacing: 0.1em;
+  border: 1px solid rgba(255,215,0,0.3);
+  padding: 2px 8px;
   border-radius: 2px;
-  color: var(--muted);
-  letter-spacing: 0.05em;
+  background: rgba(255,215,0,0.05);
 }
 
-.nav-pill.active {
-  border-color: var(--cyan);
-  color: var(--cyan);
-  background: rgba(0,245,255,0.05);
-  box-shadow: var(--glow-c);
-}
+.status-hud { display: flex; align-items: center; gap: 10px; }
 
-.status-hud { display: flex; align-items: center; gap: 10px; font-family: 'Share Tech Mono', monospace; font-size: 0.72rem; }
-.hud-item { display: flex; align-items: center; gap: 5px; color: var(--muted); }
+.hud-item {
+  display: flex; align-items: center; gap: 5px;
+  font-family: 'Share Tech Mono', monospace; font-size: 0.65rem;
+}
 
 .hud-dot {
-  width: 5px; height: 5px;
-  border-radius: 50%;
-  background: var(--green);
-  animation: blink 1.5s infinite;
+  width: 5px; height: 5px; border-radius: 50%;
+  background: var(--green); animation: blink 1.5s infinite;
 }
 
-.hud-dot.offline { background: var(--pink); }
+.hud-dot.offline { background: var(--red); }
 
-@keyframes blink {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.2; }
-}
+@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.2; } }
 
+/* ── HERO ───────────────────────────────────────── */
 .hero { padding: 30px 0 20px; text-align: center; position: relative; }
 
 .hero-title {
@@ -160,11 +177,11 @@ header::after {
 
 .hero-title .line1 { color: var(--white); }
 .hero-title .line2 {
-  background: linear-gradient(90deg, var(--cyan), var(--purple), var(--pink));
+  background: linear-gradient(90deg, var(--orange), var(--gold), var(--red));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  animation: gradientShift 4s ease-in-out infinite;
+  animation: gradientShift 3s ease-in-out infinite;
   background-size: 200% auto;
 }
 
@@ -175,75 +192,83 @@ header::after {
 }
 
 .hero-title::before {
-  content: 'VISION SYSTEM ONLINE';
+  content: '木ノ葉隠れの里 · HIDDEN LEAF VILLAGE';
   position: absolute;
-  top: -20px; left: 50%;
+  top: -22px; left: 50%;
   transform: translateX(-50%);
-  font-size: 0.6rem;
+  font-size: 0.58rem;
   font-family: 'Share Tech Mono', monospace;
-  color: var(--cyan);
-  letter-spacing: 0.3em;
-  opacity: 0.6;
-  animation: textFlicker 3s infinite;
+  color: var(--gold);
+  letter-spacing: 0.2em;
+  opacity: 0.7;
   white-space: nowrap;
+  animation: textFlicker 4s infinite;
 }
 
 @keyframes textFlicker {
-  0%, 95%, 100% { opacity: 0.6; }
-  96% { opacity: 0; }
-  97% { opacity: 0.6; }
+  0%, 93%, 100% { opacity: 0.7; }
+  94% { opacity: 0; }
+  96% { opacity: 0.7; }
   98% { opacity: 0; }
 }
 
 .hero-sub { font-size: 1rem; color: var(--muted); letter-spacing: 0.05em; margin-bottom: 20px; }
 
-.layer-strip { display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; margin-bottom: 24px; }
+/* ── LAYER STRIP (no L1/L2 labels) ─────────────── */
+.layer-strip {
+  display: flex; gap: 8px; justify-content: center;
+  flex-wrap: wrap; margin-bottom: 24px;
+}
 
 .layer-chip {
   font-family: 'Share Tech Mono', monospace;
   font-size: 0.65rem;
-  padding: 3px 10px;
-  border: 1px solid var(--border);
+  padding: 4px 12px;
+  border: 1px solid rgba(255,107,0,0.2);
   border-radius: 2px;
   color: var(--muted);
   letter-spacing: 0.05em;
-  position: relative;
-  overflow: hidden;
+  position: relative; overflow: hidden;
+  transition: all 0.3s;
 }
 
 .layer-chip::before {
   content: '';
-  position: absolute;
-  left: 0; top: 0; bottom: 0;
-  width: 2px; background: var(--cyan); opacity: 0;
+  position: absolute; left: 0; top: 0; bottom: 0;
+  width: 2px; background: var(--orange); opacity: 0;
 }
 
-.layer-chip.on { border-color: rgba(0,245,255,0.3); color: var(--cyan); background: rgba(0,245,255,0.04); }
+.layer-chip.on {
+  border-color: rgba(255,107,0,0.4);
+  color: var(--orange);
+  background: rgba(255,107,0,0.05);
+}
+
 .layer-chip.on::before { opacity: 1; }
 
+/* ── MAIN LAYOUT ────────────────────────────────── */
 .main-grid {
-  display: grid;
-  grid-template-columns: 1fr 360px;
-  gap: 16px;
-  margin-bottom: 16px;
+  display: grid; grid-template-columns: 1fr 360px;
+  gap: 16px; margin-bottom: 16px;
 }
 
 @media(max-width:900px) { .main-grid { grid-template-columns: 1fr; } }
 
+/* ── PANELS ─────────────────────────────────────── */
 .panel {
   background: var(--surface);
-  border: 1px solid var(--border);
+  border: 1px solid rgba(255,107,0,0.15);
   border-radius: 4px;
-  overflow: hidden;
-  position: relative;
+  overflow: hidden; position: relative;
 }
 
+/* Naruto corner decorations */
 .panel::before, .panel::after {
   content: '';
   position: absolute;
-  width: 12px; height: 12px;
-  border-color: var(--cyan); border-style: solid;
-  opacity: 0.6; z-index: 2; pointer-events: none;
+  width: 14px; height: 14px;
+  border-color: var(--orange); border-style: solid;
+  opacity: 0.5; z-index: 2; pointer-events: none;
 }
 
 .panel::before { top: 0; left: 0; border-width: 2px 0 0 2px; }
@@ -251,25 +276,25 @@ header::after {
 
 .panel-header {
   padding: 10px 16px;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid rgba(255,107,0,0.12);
   display: flex; align-items: center; justify-content: space-between;
   background: var(--surface2); position: relative;
 }
 
 .panel-header::after {
   content: '';
-  position: absolute;
-  bottom: 0; left: 0;
+  position: absolute; bottom: 0; left: 0;
   height: 1px; width: 60%;
-  background: linear-gradient(90deg, var(--cyan), transparent);
+  background: linear-gradient(90deg, var(--orange), transparent);
 }
 
 .panel-title {
   font-family: 'Orbitron', monospace;
   font-size: 0.65rem; font-weight: 700;
-  letter-spacing: 0.15em; color: var(--cyan); text-transform: uppercase;
+  letter-spacing: 0.15em; color: var(--orange); text-transform: uppercase;
 }
 
+/* ── CAMERA AREA ────────────────────────────────── */
 .camera-wrap {
   position: relative; background: #000;
   aspect-ratio: 16/9; overflow: hidden;
@@ -278,15 +303,17 @@ header::after {
 #videoEl { width: 100%; height: 100%; object-fit: cover; display: none; }
 #canvasEl { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
 
+/* Scanlines */
 .scanlines {
   position: absolute; inset: 0;
-  background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.15) 2px, rgba(0,0,0,0.15) 4px);
+  background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.12) 2px, rgba(0,0,0,0.12) 4px);
   pointer-events: none; z-index: 3;
 }
 
+/* HUD corners - Naruto style */
 .hud-corner {
   position: absolute; width: 24px; height: 24px;
-  border-color: var(--cyan); border-style: solid;
+  border-color: var(--orange); border-style: solid;
   opacity: 0; transition: opacity 0.3s; z-index: 4;
 }
 
@@ -296,10 +323,11 @@ header::after {
 .hud-corner.bl { bottom: 10px; left: 10px; border-width: 0 0 2px 2px; }
 .hud-corner.br { bottom: 10px; right: 10px; border-width: 0 2px 2px 0; }
 
+/* Sharingan scan beam */
 .scan-beam {
   position: absolute; left: 0; right: 0; height: 2px;
-  background: linear-gradient(90deg, transparent, var(--cyan), var(--pink), transparent);
-  box-shadow: 0 0 10px var(--cyan);
+  background: linear-gradient(90deg, transparent, var(--red), var(--orange), transparent);
+  box-shadow: 0 0 10px var(--red);
   animation: beamScan 2.5s linear infinite;
   opacity: 0; z-index: 4;
 }
@@ -307,31 +335,17 @@ header::after {
 .camera-wrap.active .scan-beam { opacity: 1; }
 @keyframes beamScan { 0% { top: 0%; } 100% { top: 100%; } }
 
+/* Camera placeholder with Sharingan */
 .cam-placeholder {
   position: absolute; inset: 0;
   display: flex; flex-direction: column;
-  align-items: center; justify-content: center; gap: 16px;
+  align-items: center; justify-content: center; gap: 20px;
 }
 
-.cam-circle {
-  width: 80px; height: 80px;
-  border: 2px solid var(--cyan); border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 2rem;
-  box-shadow: var(--glow-c), inset 0 0 20px rgba(0,245,255,0.1);
-  animation: iconPulse 2s infinite; position: relative;
-}
-
-.cam-circle::before {
-  content: '';
-  position: absolute; inset: -8px;
-  border: 1px solid rgba(0,245,255,0.2); border-radius: 50%;
-  animation: ringExpand 2s ease-out infinite;
-}
-
-@keyframes ringExpand {
-  0% { transform: scale(1); opacity: 0.5; }
-  100% { transform: scale(1.5); opacity: 0; }
+/* Large Sharingan for placeholder */
+.sharingan-large {
+  width: 100px; height: 100px;
+  animation: sharinganSpin 4s linear infinite, sharinganGlow 2s ease-in-out infinite;
 }
 
 .cam-placeholder p {
@@ -339,9 +353,10 @@ header::after {
   font-size: 0.75rem; color: var(--muted); letter-spacing: 0.1em;
 }
 
+/* Processing overlay */
 .processing {
   position: absolute; inset: 0;
-  background: rgba(3,4,10,0.8);
+  background: rgba(3,4,10,0.85);
   display: flex; align-items: center; justify-content: center;
   gap: 14px; z-index: 10;
   opacity: 0; pointer-events: none; transition: opacity 0.2s;
@@ -350,51 +365,52 @@ header::after {
 
 .processing.show { opacity: 1; pointer-events: all; }
 
-.proc-ring {
-  width: 28px; height: 28px;
-  border: 2px solid transparent;
-  border-top-color: var(--cyan); border-right-color: var(--pink);
-  border-radius: 50%;
-  animation: spin 0.6s linear infinite;
+/* Spinning sharingan loader */
+.proc-sharingan {
+  width: 36px; height: 36px;
+  animation: sharinganSpin 0.5s linear infinite;
+  filter: drop-shadow(0 0 8px rgba(204,0,0,0.9));
 }
-
-@keyframes spin { to { transform: rotate(360deg); } }
 
 .processing span {
   font-family: 'Share Tech Mono', monospace;
-  font-size: 0.75rem; color: var(--cyan); letter-spacing: 0.1em;
+  font-size: 0.75rem; color: var(--orange); letter-spacing: 0.1em;
 }
 
+/* ── INPUTS ─────────────────────────────────────── */
 .api-bar {
-  padding: 8px 16px; border-bottom: 1px solid var(--border);
+  padding: 8px 16px; border-bottom: 1px solid rgba(255,107,0,0.1);
   display: flex; gap: 8px; align-items: center; background: var(--bg2);
 }
 
-.api-label { font-family: 'Share Tech Mono', monospace; font-size: 0.65rem; color: var(--muted); white-space: nowrap; }
+.api-label {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.65rem; color: var(--muted); white-space: nowrap;
+}
 
 .input-field {
   flex: 1; background: var(--surface2);
-  border: 1px solid var(--border); border-radius: 2px;
-  padding: 6px 10px; color: var(--cyan);
+  border: 1px solid rgba(255,107,0,0.15); border-radius: 2px;
+  padding: 6px 10px; color: var(--orange);
   font-family: 'Share Tech Mono', monospace; font-size: 0.72rem;
   outline: none; transition: border-color 0.2s;
 }
 
-.input-field:focus { border-color: var(--cyan); box-shadow: var(--glow-c); }
+.input-field:focus { border-color: var(--orange); box-shadow: var(--glow-o); }
 .input-field::placeholder { color: var(--muted); }
 
 .upload-zone {
   margin: 10px 16px;
-  border: 1px dashed rgba(0,245,255,0.2); border-radius: 3px;
-  padding: 14px; text-align: center; cursor: pointer;
-  transition: all 0.3s;
+  border: 1px dashed rgba(255,107,0,0.2); border-radius: 3px;
+  padding: 14px; text-align: center; cursor: pointer; transition: all 0.3s;
   font-family: 'Share Tech Mono', monospace; font-size: 0.7rem;
   color: var(--muted); letter-spacing: 0.05em;
 }
 
-.upload-zone:hover { border-color: var(--cyan); color: var(--cyan); background: rgba(0,245,255,0.03); }
+.upload-zone:hover { border-color: var(--orange); color: var(--orange); background: rgba(255,107,0,0.03); }
 #fileInput { display: none; }
 
+/* ── BUTTONS ────────────────────────────────────── */
 .controls { padding: 10px 16px; display: flex; gap: 8px; flex-wrap: wrap; }
 
 .btn {
@@ -405,33 +421,34 @@ header::after {
   letter-spacing: 0.1em; text-transform: uppercase;
 }
 
-.btn-cyan {
-  background: linear-gradient(135deg, rgba(0,245,255,0.15), rgba(0,245,255,0.05));
-  color: var(--cyan); border: 1px solid rgba(0,245,255,0.4);
+.btn-orange {
+  background: linear-gradient(135deg, rgba(255,107,0,0.2), rgba(255,107,0,0.05));
+  color: var(--orange); border: 1px solid rgba(255,107,0,0.4);
 }
 
-.btn-cyan:hover { box-shadow: var(--glow-c); transform: translateY(-1px); border-color: var(--cyan); }
-.btn-cyan:disabled { opacity: 0.3; cursor: not-allowed; transform: none; }
+.btn-orange:hover { box-shadow: var(--glow-o); transform: translateY(-1px); }
+.btn-orange:disabled { opacity: 0.3; cursor: not-allowed; transform: none; }
 
-.btn-pink {
-  background: linear-gradient(135deg, rgba(255,45,120,0.15), rgba(255,45,120,0.05));
-  color: var(--pink); border: 1px solid rgba(255,45,120,0.4);
+.btn-red {
+  background: linear-gradient(135deg, rgba(204,0,0,0.2), rgba(204,0,0,0.05));
+  color: #ff4444; border: 1px solid rgba(204,0,0,0.4);
 }
 
-.btn-pink:hover { box-shadow: var(--glow-p); transform: translateY(-1px); }
-.btn-ghost { background: transparent; color: var(--muted); border: 1px solid var(--border); }
-.btn-ghost:hover { border-color: var(--cyan); color: var(--cyan); }
+.btn-red:hover { box-shadow: var(--glow-r); transform: translateY(-1px); }
+.btn-ghost { background: transparent; color: var(--muted); border: 1px solid rgba(255,255,255,0.08); }
+.btn-ghost:hover { border-color: var(--orange); color: var(--orange); }
 
+/* ── STATS BAR ──────────────────────────────────── */
 .stats-bar {
   display: grid; grid-template-columns: repeat(3, 1fr);
-  gap: 1px; background: var(--border); border-top: 1px solid var(--border);
+  gap: 1px; background: rgba(255,107,0,0.1); border-top: 1px solid rgba(255,107,0,0.15);
 }
 
 .stat { background: var(--surface2); padding: 12px 16px; text-align: center; }
 
 .stat-val {
   font-family: 'Orbitron', monospace; font-size: 1.6rem; font-weight: 900;
-  color: var(--cyan); text-shadow: 0 0 20px rgba(0,245,255,0.5);
+  color: var(--orange); text-shadow: 0 0 20px rgba(255,107,0,0.6);
 }
 
 .stat-label {
@@ -439,13 +456,14 @@ header::after {
   color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase;
 }
 
+/* ── RIGHT COLUMN ───────────────────────────────── */
 .right-col { display: flex; flex-direction: column; gap: 14px; }
 .obj-form { padding: 16px; display: flex; flex-direction: column; gap: 10px; }
 .input-row { display: flex; gap: 8px; }
 
 .hint-text {
   font-family: 'Share Tech Mono', monospace;
-  font-size: 0.62rem; color: var(--muted); letter-spacing: 0.03em; line-height: 1.5;
+  font-size: 0.62rem; color: var(--muted); line-height: 1.5;
 }
 
 .obj-list-header {
@@ -467,22 +485,22 @@ header::after {
 .obj-row {
   display: flex; align-items: center; gap: 8px;
   padding: 6px 10px; background: var(--surface2);
-  border: 1px solid var(--border); border-radius: 2px;
+  border: 1px solid rgba(255,107,0,0.1); border-radius: 2px;
   animation: rowIn 0.3s ease; transition: all 0.2s; position: relative; overflow: hidden;
 }
 
 .obj-row::before {
   content: '';
   position: absolute; left: 0; top: 0; bottom: 0;
-  width: 2px; background: var(--cyan); opacity: 0; transition: opacity 0.2s;
+  width: 2px; background: var(--orange); opacity: 0; transition: opacity 0.2s;
 }
 
-.obj-row:hover { border-color: rgba(0,245,255,0.3); }
+.obj-row:hover { border-color: rgba(255,107,0,0.3); }
 .obj-row:hover::before { opacity: 1; }
-.obj-row.new { border-color: rgba(0,245,255,0.5); animation: rowGlow 1s ease; }
+.obj-row.new { border-color: rgba(255,107,0,0.5); animation: rowGlow 1s ease; }
 
 @keyframes rowIn { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
-@keyframes rowGlow { 0%, 100% { box-shadow: none; } 50% { box-shadow: 0 0 15px rgba(0,245,255,0.3); } }
+@keyframes rowGlow { 0%, 100% { box-shadow: none; } 50% { box-shadow: 0 0 15px rgba(255,107,0,0.3); } }
 
 .obj-idx {
   font-family: 'Share Tech Mono', monospace;
@@ -498,23 +516,24 @@ header::after {
   padding: 2px 6px; border-radius: 2px; transition: all 0.2s;
 }
 
-.obj-del:hover { background: rgba(255,45,120,0.15); color: var(--pink); }
+.obj-del:hover { background: rgba(204,0,0,0.15); color: #ff4444; }
 
+/* ── RESULTS ────────────────────────────────────── */
 .results-list {
   padding: 12px; display: flex; flex-direction: column;
   gap: 6px; max-height: 260px; overflow-y: auto;
 }
 
 .result-card {
-  background: var(--surface2); border: 1px solid var(--border);
+  background: var(--surface2); border: 1px solid rgba(255,107,0,0.1);
   border-radius: 2px; padding: 8px 12px;
   display: flex; align-items: center; justify-content: space-between;
   animation: resultIn 0.3s ease; position: relative; overflow: hidden;
 }
 
 .result-card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 2px; }
-.result-card.yolo::before { background: var(--cyan); }
-.result-card.dino::before { background: var(--purple); }
+.result-card.yolo::before { background: var(--orange); }
+.result-card.dino::before { background: var(--red); }
 
 @keyframes resultIn { from { opacity: 0; transform: translateX(8px); } to { opacity: 1; transform: translateX(0); } }
 
@@ -524,8 +543,8 @@ header::after {
   font-family: 'Orbitron', monospace; font-size: 0.72rem; font-weight: 700; text-transform: capitalize;
 }
 
-.result-card.yolo .result-name { color: var(--cyan); }
-.result-card.dino .result-name { color: var(--purple); }
+.result-card.yolo .result-name { color: var(--orange); }
+.result-card.dino .result-name { color: #ff4444; }
 .result-tag { font-family: 'Share Tech Mono', monospace; font-size: 0.55rem; color: var(--muted); }
 
 .result-right { display: flex; align-items: center; }
@@ -534,8 +553,8 @@ header::after {
 .conf-ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
 .conf-ring circle { fill: none; stroke-width: 3; stroke-linecap: round; }
 .conf-ring .bg-ring { stroke: var(--surface); }
-.conf-ring .fg-ring { stroke: var(--cyan); }
-.result-card.dino .conf-ring .fg-ring { stroke: var(--purple); }
+.conf-ring .fg-ring { stroke: var(--orange); }
+.result-card.dino .conf-ring .fg-ring { stroke: #ff4444; }
 
 .conf-pct {
   position: absolute; inset: 0;
@@ -548,28 +567,162 @@ header::after {
   font-family: 'Share Tech Mono', monospace; font-size: 0.72rem; padding: 24px; letter-spacing: 0.05em;
 }
 
+/* ── SCROLLBAR ──────────────────────────────────── */
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: rgba(0,245,255,0.2); border-radius: 2px; }
+::-webkit-scrollbar-thumb { background: rgba(255,107,0,0.2); border-radius: 2px; }
 
+/* ── TOAST ──────────────────────────────────────── */
 .toast {
-  position: fixed; bottom: 20px; right: 20px;
-  background: var(--surface2); border: 1px solid var(--cyan);
+  position: fixed; bottom: 80px; right: 20px;
+  background: var(--surface2); border: 1px solid var(--orange);
   border-radius: 3px; padding: 10px 18px;
-  font-family: 'Share Tech Mono', monospace; font-size: 0.72rem; color: var(--cyan);
+  font-family: 'Share Tech Mono', monospace; font-size: 0.72rem; color: var(--orange);
   transform: translateY(60px); opacity: 0;
   transition: all 0.3s; z-index: 1000;
-  box-shadow: var(--glow-c); letter-spacing: 0.05em;
+  box-shadow: var(--glow-o); letter-spacing: 0.05em;
 }
 
 .toast.show { transform: translateY(0); opacity: 1; }
-.toast.err { border-color: var(--pink); color: var(--pink); box-shadow: var(--glow-p); }
+.toast.err { border-color: #ff4444; color: #ff4444; box-shadow: var(--glow-r); }
 
-footer {
-  text-align: center; padding: 20px 0;
-  border-top: 1px solid var(--border); margin-top: 16px;
-  font-family: 'Share Tech Mono', monospace; font-size: 0.62rem;
-  color: var(--muted); letter-spacing: 0.08em;
+/* ══════════════════════════════════════════════════
+   LEAF VILLAGE FOOTER THEME
+   ══════════════════════════════════════════════════ */
+.leaf-footer {
+  margin-top: 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Main footer bar */
+.footer-main {
+  background: linear-gradient(180deg, var(--bg) 0%, #0a1a0a 50%, #061206 100%);
+  border-top: 2px solid rgba(45,90,27,0.5);
+  padding: 0;
+  position: relative;
+}
+
+/* Forest silhouette */
+.forest-silhouette {
+  width: 100%;
+  height: 80px;
+  position: relative;
+  overflow: hidden;
+}
+
+.forest-silhouette svg {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  bottom: 0;
+}
+
+/* Footer content */
+.footer-content {
+  padding: 16px 20px 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  position: relative;
+  z-index: 2;
+}
+
+/* Leaf village symbol */
+.leaf-symbol {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.leaf-emblem {
+  width: 50px; height: 50px;
+  position: relative;
+  animation: emblemFloat 3s ease-in-out infinite;
+}
+
+@keyframes emblemFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+/* Falling leaves animation */
+.leaf-particle {
+  position: absolute;
+  font-size: 1rem;
+  opacity: 0;
+  animation: leafFall linear infinite;
+  pointer-events: none;
+  z-index: 1;
+}
+
+@keyframes leafFall {
+  0% { transform: translateY(-20px) rotate(0deg); opacity: 0.8; }
+  100% { transform: translateY(100px) rotate(360deg); opacity: 0; }
+}
+
+.footer-village-name {
+  font-family: 'Orbitron', monospace;
+  font-size: 0.9rem;
+  font-weight: 900;
+  letter-spacing: 0.15em;
+  color: var(--gold);
+  text-shadow: 0 0 20px rgba(255,215,0,0.5);
+}
+
+.footer-village-jp {
+  font-size: 0.75rem;
+  color: var(--leaf2);
+  font-family: 'Share Tech Mono', monospace;
+  letter-spacing: 0.2em;
+}
+
+.footer-divider {
+  width: 200px; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--leaf2), var(--gold), var(--leaf2), transparent);
+  margin: 4px 0;
+}
+
+.footer-bottom {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.6rem; color: rgba(74,140,42,0.6);
+  letter-spacing: 0.1em; text-align: center;
+}
+
+.footer-project {
+  font-family: 'Orbitron', monospace;
+  font-size: 0.65rem;
+  color: var(--orange);
+  letter-spacing: 0.08em;
+}
+
+/* Kunai decoration */
+.kunai {
+  font-size: 0.8rem;
+  color: var(--gold);
+  opacity: 0.5;
+  animation: kunaiSpin 3s linear infinite;
+}
+
+@keyframes kunaiSpin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Ground glow */
+.ground-glow {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--leaf2), var(--gold), var(--leaf2), transparent);
+  opacity: 0.4;
+  animation: groundPulse 2s ease-in-out infinite;
+}
+
+@keyframes groundPulse {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 0.7; }
 }
 </style>
 </head>
@@ -579,54 +732,89 @@ footer {
 
 <div class="container">
 
+  <!-- ── HEADER ── -->
   <header>
     <div class="logo">
-      <div class="logo-icon">👁</div>
-      Dyna<span class="c">Detect</span><span class="p">AI</span>
+      <!-- Sharingan replaces eye icon -->
+      <svg class="sharingan sharingan-pulse" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <!-- Outer ring -->
+        <circle cx="50" cy="50" r="48" fill="#1a0000" stroke="#cc0000" stroke-width="2"/>
+        <!-- Red iris -->
+        <circle cx="50" cy="50" r="38" fill="#cc0000" opacity="0.9"/>
+        <!-- Black pupil -->
+        <circle cx="50" cy="50" r="18" fill="#0a0000"/>
+        <!-- Tomoe 1 -->
+        <g transform="rotate(0, 50, 50)">
+          <circle cx="50" cy="28" r="7" fill="#0a0000"/>
+          <circle cx="50" cy="34" r="4" fill="#cc0000"/>
+        </g>
+        <!-- Tomoe 2 -->
+        <g transform="rotate(120, 50, 50)">
+          <circle cx="50" cy="28" r="7" fill="#0a0000"/>
+          <circle cx="50" cy="34" r="4" fill="#cc0000"/>
+        </g>
+        <!-- Tomoe 3 -->
+        <g transform="rotate(240, 50, 50)">
+          <circle cx="50" cy="28" r="7" fill="#0a0000"/>
+          <circle cx="50" cy="34" r="4" fill="#cc0000"/>
+        </g>
+        <!-- Center highlight -->
+        <circle cx="50" cy="50" r="6" fill="#330000"/>
+        <circle cx="44" cy="44" r="3" fill="#ff000033"/>
+      </svg>
+      Dyna<span class="o">Detect</span> <span class="r">AI</span>
     </div>
-    <div class="nav-pills">
-      <div class="nav-pill active">DETECT</div>
-      <div class="nav-pill">REGISTRY</div>
-      <div class="nav-pill">STATS</div>
+
+    <div class="headband">
+      <div class="headband-line"></div>
+      <div class="headband-symbol">🍃 KONOHA TECH · 木ノ葉</div>
+      <div class="headband-line"></div>
     </div>
+
     <div class="status-hud">
       <div class="hud-item">
         <div class="hud-dot" id="apiDot"></div>
-        <span id="apiStatus" style="font-size:0.65rem;color:var(--muted)">CONNECTING...</span>
+        <span id="apiStatus" style="font-size:0.65rem;color:var(--muted);font-family:'Share Tech Mono',monospace">CONNECTING...</span>
       </div>
     </div>
   </header>
 
+  <!-- ── HERO ── -->
   <div class="hero">
     <div class="hero-title">
       <div class="line1">ZERO-SHOT</div>
       <div class="line2">OBJECT DETECTION</div>
     </div>
     <p class="hero-sub">Add any object — detect instantly — no retraining required</p>
+
+    <!-- Layer strip WITHOUT L1/L2/L3 labels -->
     <div class="layer-strip">
-      <div class="layer-chip on">L1A · YOLOV8</div>
-      <div class="layer-chip on">L1B · GROUNDING DINO</div>
-      <div class="layer-chip on">L2 · CLIP</div>
-      <div class="layer-chip on">L3 · EWC+REPLAY</div>
-      <div class="layer-chip on">L4 · FAISS</div>
-      <div class="layer-chip on">L5 · CONTINUAL</div>
-      <div class="layer-chip on">L6 · SAM</div>
-      <div class="layer-chip on">L7 · FASTAPI</div>
+      <div class="layer-chip on">YOLOV8</div>
+      <div class="layer-chip on">GROUNDING DINO</div>
+      <div class="layer-chip on">CLIP</div>
+      <div class="layer-chip on">EWC + REPLAY</div>
+      <div class="layer-chip on">FAISS</div>
+      <div class="layer-chip on">CONTINUAL</div>
+      <div class="layer-chip on">SAM</div>
+      <div class="layer-chip on">QUANTUM</div>
+      <div class="layer-chip on">FASTAPI</div>
     </div>
   </div>
 
+  <!-- ── MAIN GRID ── -->
   <div class="main-grid">
 
+    <!-- Camera Panel -->
     <div class="panel">
       <div class="panel-header">
-        <span class="panel-title">◈ VISION INPUT</span>
+        <span class="panel-title">◈ SHARINGAN VISION</span>
         <span id="modeLabel" style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--muted)">STANDBY</span>
       </div>
 
       <div class="api-bar">
         <span class="api-label">◉ API ENDPOINT</span>
         <input class="input-field" id="apiUrl" value="https://friendless-sky-inventable.ngrok-free.dev" style="max-width:320px"/>
-        <button class="btn btn-cyan" style="padding:6px 12px;font-size:0.55rem;" onclick="checkAPI()">SYNC</button>
+        <button class="btn btn-orange" style="padding:6px 12px;font-size:0.55rem;" onclick="checkAPI()">SYNC</button>
       </div>
 
       <div class="camera-wrap" id="cameraWrap">
@@ -638,26 +826,54 @@ footer {
         <div class="hud-corner tr"></div>
         <div class="hud-corner bl"></div>
         <div class="hud-corner br"></div>
+
+        <!-- Sharingan placeholder -->
         <div class="cam-placeholder" id="placeholder">
-          <div class="cam-circle">👁</div>
-          <p>INITIALIZE CAMERA OR UPLOAD IMAGE</p>
+          <svg class="sharingan-large" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="50" cy="50" r="48" fill="#1a0000" stroke="#cc0000" stroke-width="2"/>
+            <circle cx="50" cy="50" r="38" fill="#cc0000" opacity="0.9"/>
+            <circle cx="50" cy="50" r="18" fill="#0a0000"/>
+            <g transform="rotate(0, 50, 50)">
+              <circle cx="50" cy="28" r="7" fill="#0a0000"/>
+              <circle cx="50" cy="34" r="4" fill="#cc0000"/>
+            </g>
+            <g transform="rotate(120, 50, 50)">
+              <circle cx="50" cy="28" r="7" fill="#0a0000"/>
+              <circle cx="50" cy="34" r="4" fill="#cc0000"/>
+            </g>
+            <g transform="rotate(240, 50, 50)">
+              <circle cx="50" cy="28" r="7" fill="#0a0000"/>
+              <circle cx="50" cy="34" r="4" fill="#cc0000"/>
+            </g>
+            <circle cx="50" cy="50" r="6" fill="#330000"/>
+          </svg>
+          <p>ACTIVATE SHARINGAN OR UPLOAD IMAGE</p>
         </div>
+
+        <!-- Sharingan processing overlay -->
         <div class="processing" id="processing">
-          <div class="proc-ring"></div>
-          <span>ANALYZING TARGET...</span>
+          <svg class="proc-sharingan" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="50" cy="50" r="48" fill="#1a0000" stroke="#cc0000" stroke-width="2"/>
+            <circle cx="50" cy="50" r="38" fill="#cc0000" opacity="0.9"/>
+            <circle cx="50" cy="50" r="18" fill="#0a0000"/>
+            <g transform="rotate(0, 50, 50)"><circle cx="50" cy="28" r="7" fill="#0a0000"/><circle cx="50" cy="34" r="4" fill="#cc0000"/></g>
+            <g transform="rotate(120, 50, 50)"><circle cx="50" cy="28" r="7" fill="#0a0000"/><circle cx="50" cy="34" r="4" fill="#cc0000"/></g>
+            <g transform="rotate(240, 50, 50)"><circle cx="50" cy="28" r="7" fill="#0a0000"/><circle cx="50" cy="34" r="4" fill="#cc0000"/></g>
+          </svg>
+          <span>SHARINGAN ANALYZING...</span>
         </div>
       </div>
 
       <div class="upload-zone" onclick="document.getElementById('fileInput').click()">
-        ⟁ DROP IMAGE FILE OR CLICK TO UPLOAD
+        🍃 DROP IMAGE FILE OR CLICK TO UPLOAD
         <input type="file" id="fileInput" accept="image/*" onchange="handleFileUpload(event)"/>
       </div>
 
       <div class="controls">
-        <button class="btn btn-cyan" id="startBtn" onclick="startCamera()">▶ INIT CAM</button>
-        <button class="btn btn-ghost" id="captureBtn" onclick="captureAndDetect()" disabled>◎ CAPTURE</button>
-        <button class="btn btn-ghost" id="autoBtn" onclick="toggleAuto()" disabled>⟳ AUTO</button>
-        <button class="btn btn-pink" id="stopBtn" onclick="stopCamera()" style="display:none">■ HALT</button>
+        <button class="btn btn-orange" id="startBtn" onclick="startCamera()">👁 ACTIVATE</button>
+        <button class="btn btn-ghost" id="captureBtn" onclick="captureAndDetect()" disabled>◎ SCAN</button>
+        <button class="btn btn-ghost" id="autoBtn" onclick="toggleAuto()" disabled>⟳ AUTO SCAN</button>
+        <button class="btn btn-red" id="stopBtn" onclick="stopCamera()" style="display:none">■ DEACTIVATE</button>
       </div>
 
       <div class="stats-bar">
@@ -676,6 +892,7 @@ footer {
       </div>
     </div>
 
+    <!-- Right Column -->
     <div class="right-col">
 
       <div class="panel">
@@ -687,13 +904,13 @@ footer {
           <div class="input-row">
             <input class="input-field" id="newObjInput" placeholder="register new target..."
               onkeydown="if(event.key==='Enter') addObject()"/>
-            <button class="btn btn-cyan" onclick="addObject()">ADD</button>
+            <button class="btn btn-orange" onclick="addObject()">ADD</button>
           </div>
-          <p class="hint-text">▸ Type any object name → CLIP encodes → FAISS stores → detectable instantly</p>
+          <p class="hint-text">🍃 Type any object → CLIP encodes → FAISS stores → detectable instantly</p>
         </div>
         <div class="obj-list-header">
           <span class="obj-list-label">◈ REGISTERED TARGETS</span>
-          <button class="btn btn-pink" style="padding:3px 8px;font-size:0.5rem;" onclick="clearAll()">PURGE ALL</button>
+          <button class="btn btn-red" style="padding:3px 8px;font-size:0.5rem;" onclick="clearAll()">PURGE ALL</button>
         </div>
         <div class="obj-list" id="objList">
           <div class="no-result">NO TARGETS REGISTERED</div>
@@ -706,22 +923,144 @@ footer {
           <button class="btn btn-ghost" style="padding:3px 8px;font-size:0.5rem;" onclick="clearResults()">CLEAR</button>
         </div>
         <div class="results-list" id="resultsList">
-          <div class="no-result">AWAITING SCAN...</div>
+          <div class="no-result">AWAITING SHARINGAN SCAN...</div>
         </div>
       </div>
 
     </div>
   </div>
 
-  <footer>
-    DYNADETECT AI · 7-LAYER INCREMENTAL OBJECT DETECTION · IIIT MANIPUR HACKATHON · AKUMEN AI · 2026
-  </footer>
+  <!-- ══════════════════════════════════════════════
+       LEAF VILLAGE FOOTER
+       ══════════════════════════════════════════════ -->
+  <div class="leaf-footer">
+    <div class="footer-main">
+
+      <!-- Forest silhouette -->
+      <div class="forest-silhouette">
+        <svg viewBox="0 0 1300 80" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+          <!-- Back trees (darker) -->
+          <g fill="#0d1f0d" opacity="0.8">
+            <polygon points="50,80 80,20 110,80"/>
+            <polygon points="90,80 125,10 160,80"/>
+            <polygon points="140,80 165,25 190,80"/>
+            <polygon points="200,80 230,15 260,80"/>
+            <polygon points="250,80 280,30 310,80"/>
+            <polygon points="320,80 355,5 390,80"/>
+            <polygon points="370,80 400,20 430,80"/>
+            <polygon points="440,80 470,12 500,80"/>
+            <polygon points="490,80 520,28 550,80"/>
+            <polygon points="560,80 595,8 630,80"/>
+            <polygon points="610,80 640,22 670,80"/>
+            <polygon points="680,80 710,15 740,80"/>
+            <polygon points="730,80 760,30 790,80"/>
+            <polygon points="800,80 835,6 870,80"/>
+            <polygon points="850,80 880,20 910,80"/>
+            <polygon points="920,80 950,14 980,80"/>
+            <polygon points="970,80 1000,28 1030,80"/>
+            <polygon points="1040,80 1075,10 1110,80"/>
+            <polygon points="1090,80 1120,25 1150,80"/>
+            <polygon points="1160,80 1190,8 1220,80"/>
+            <polygon points="1210,80 1240,22 1270,80"/>
+          </g>
+          <!-- Front trees (lighter green) -->
+          <g fill="#1a3d1a" opacity="0.9">
+            <polygon points="0,80 25,35 50,80"/>
+            <polygon points="30,80 60,18 90,80"/>
+            <polygon points="70,80 100,40 130,80"/>
+            <polygon points="120,80 155,12 190,80"/>
+            <polygon points="175,80 205,38 235,80"/>
+            <polygon points="230,80 265,8 300,80"/>
+            <polygon points="285,80 315,35 345,80"/>
+            <polygon points="340,80 375,15 410,80"/>
+            <polygon points="395,80 425,42 455,80"/>
+            <polygon points="450,80 485,10 520,80"/>
+            <polygon points="505,80 535,38 565,80"/>
+            <polygon points="560,80 595,12 630,80"/>
+            <polygon points="615,80 645,40 675,80"/>
+            <polygon points="670,80 705,8 740,80"/>
+            <polygon points="725,80 755,36 785,80"/>
+            <polygon points="780,80 815,14 850,80"/>
+            <polygon points="835,80 865,42 895,80"/>
+            <polygon points="890,80 925,10 960,80"/>
+            <polygon points="945,80 975,38 1005,80"/>
+            <polygon points="1000,80 1035,12 1070,80"/>
+            <polygon points="1055,80 1085,40 1115,80"/>
+            <polygon points="1110,80 1145,8 1180,80"/>
+            <polygon points="1165,80 1195,36 1225,80"/>
+            <polygon points="1220,80 1255,15 1290,80"/>
+            <polygon points="1275,80 1300,40 1300,80"/>
+          </g>
+          <!-- Ground -->
+          <rect x="0" y="75" width="1300" height="5" fill="#2d5a1b" opacity="0.8"/>
+        </svg>
+
+        <!-- Falling leaves -->
+        <div class="leaf-particle" style="left:10%;animation-duration:4s;animation-delay:0s;font-size:0.8rem;">🍃</div>
+        <div class="leaf-particle" style="left:25%;animation-duration:5s;animation-delay:1s;font-size:0.6rem;">🍃</div>
+        <div class="leaf-particle" style="left:40%;animation-duration:3.5s;animation-delay:0.5s;font-size:0.9rem;">🍃</div>
+        <div class="leaf-particle" style="left:55%;animation-duration:4.5s;animation-delay:2s;font-size:0.7rem;">🍃</div>
+        <div class="leaf-particle" style="left:70%;animation-duration:3s;animation-delay:1.5s;font-size:0.8rem;">🍃</div>
+        <div class="leaf-particle" style="left:85%;animation-duration:5s;animation-delay:0.8s;font-size:0.6rem;">🍃</div>
+        <div class="leaf-particle" style="left:95%;animation-duration:4s;animation-delay:3s;font-size:0.9rem;">🍃</div>
+      </div>
+
+      <!-- Footer content -->
+      <div class="footer-content">
+
+        <!-- Leaf Village Emblem -->
+        <div class="leaf-symbol">
+          <span class="kunai">🗡️</span>
+
+          <svg class="leaf-emblem" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <!-- Leaf village symbol -->
+            <circle cx="50" cy="50" r="45" fill="none" stroke="#2d5a1b" stroke-width="2"/>
+            <circle cx="50" cy="50" r="40" fill="#061206"/>
+            <!-- Leaf shape -->
+            <path d="M50,15 C70,15 80,30 75,50 C70,65 55,75 50,80 C45,75 30,65 25,50 C20,30 30,15 50,15 Z"
+                  fill="#2d5a1b" stroke="#4a8c2a" stroke-width="1.5"/>
+            <!-- Stem -->
+            <line x1="50" y1="80" x2="50" y2="90" stroke="#4a8c2a" stroke-width="2"/>
+            <!-- Vein -->
+            <line x1="50" y1="20" x2="50" y2="78" stroke="#4a8c2a" stroke-width="1" opacity="0.6"/>
+            <line x1="50" y1="35" x2="35" y2="50" stroke="#4a8c2a" stroke-width="0.8" opacity="0.5"/>
+            <line x1="50" y1="35" x2="65" y2="50" stroke="#4a8c2a" stroke-width="0.8" opacity="0.5"/>
+            <!-- Glow -->
+            <circle cx="50" cy="50" r="40" fill="none" stroke="#4a8c2a" stroke-width="0.5" opacity="0.3"/>
+          </svg>
+
+          <div style="text-align:center">
+            <div class="footer-village-name">HIDDEN LEAF VILLAGE</div>
+            <div class="footer-village-jp">木ノ葉隠れの里 · KONOHAGAKURE</div>
+          </div>
+
+          <span class="kunai" style="animation-direction:reverse;">🗡️</span>
+        </div>
+
+        <div class="footer-divider"></div>
+
+        <div class="footer-project">DYNADETECT AI · 7-LAYER OBJECT DETECTION</div>
+
+        <div class="footer-bottom">
+          IIIT MANIPUR TECHFEST HACKATHON · AKUMEN AI PROBLEM #2 · 2026
+        </div>
+
+        <div class="footer-bottom" style="color:rgba(255,107,0,0.4);margin-top:2px;">
+          「諦めない者が勝者だ」— Those who don't give up are the victors
+        </div>
+
+      </div>
+
+      <div class="ground-glow"></div>
+    </div>
+  </div>
+
 </div>
 
 <div class="toast" id="toast"></div>
 
 <script>
-// ── Ngrok bypass header ──────────────────────────────────
+// ── Ngrok bypass ─────────────────────────────────────────
 const NGROK_HEADERS = { 'ngrok-skip-browser-warning': 'true' };
 
 // ── Particles ────────────────────────────────────────────
@@ -730,16 +1069,16 @@ const NGROK_HEADERS = { 'ngrok-skip-browser-warning': 'true' };
   const ctx = canvas.getContext('2d');
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
-  const particles = Array.from({ length: 60 }, () => ({
+  const particles = Array.from({ length: 40 }, () => ({
     x: Math.random() * canvas.width,
     y: Math.random() * canvas.height,
     r: Math.random() * 1.5 + 0.5,
     vx: (Math.random() - 0.5) * 0.3,
-    vy: -Math.random() * 0.8 - 0.2,
+    vy: -Math.random() * 0.5 - 0.1,
     alpha: Math.random(),
-    color: Math.random() > 0.5 ? '#00f5ff' : '#ff2d78'
+    color: Math.random() > 0.5 ? '#ff6b00' : '#cc0000'
   }));
-  function drawParticles() {
+  function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     particles.forEach(p => {
       ctx.beginPath();
@@ -753,13 +1092,10 @@ const NGROK_HEADERS = { 'ngrok-skip-browser-warning': 'true' };
         p.alpha = Math.random() * 0.8 + 0.2;
       }
     });
-    requestAnimationFrame(drawParticles);
+    requestAnimationFrame(draw);
   }
-  drawParticles();
-  window.addEventListener('resize', () => {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-  });
+  draw();
+  window.addEventListener('resize', () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; });
 })();
 
 // ── State ────────────────────────────────────────────────
@@ -769,12 +1105,10 @@ let uploadedImg = null, uploadedScale = 1, uploadedX = 0, uploadedY = 0;
 
 const API = () => document.getElementById('apiUrl').value.trim();
 
-// ── API Check ─────────────────────────────────────────────
+// ── API Check ────────────────────────────────────────────
 async function checkAPI() {
   try {
-    const res = await fetch(`${API()}/objects`, {
-      headers: NGROK_HEADERS   // ← bypass ngrok warning
-    });
+    const res = await fetch(`${API()}/objects`, { headers: NGROK_HEADERS });
     const data = await res.json();
     document.getElementById('apiStatus').textContent = 'ONLINE';
     document.getElementById('apiStatus').style.color = 'var(--green)';
@@ -782,12 +1116,12 @@ async function checkAPI() {
     registeredObjects = data.objects || [];
     renderObjList();
     document.getElementById('totalObjects').textContent = registeredObjects.length;
-    showToast('▸ SYSTEM ONLINE — API CONNECTED');
+    showToast('🍃 SYSTEM ONLINE — SHARINGAN ACTIVATED');
   } catch {
     document.getElementById('apiStatus').textContent = 'OFFLINE';
-    document.getElementById('apiStatus').style.color = 'var(--pink)';
+    document.getElementById('apiStatus').style.color = 'var(--red)';
     document.getElementById('apiDot').classList.add('offline');
-    showToast('▸ CONNECTION FAILED', true);
+    showToast('🍃 CONNECTION FAILED', true);
   }
 }
 
@@ -803,10 +1137,10 @@ async function startCamera() {
     document.getElementById('autoBtn').disabled = false;
     document.getElementById('startBtn').style.display = 'none';
     document.getElementById('stopBtn').style.display = 'inline-block';
-    document.getElementById('modeLabel').textContent = 'LIVE FEED';
+    document.getElementById('modeLabel').textContent = 'SHARINGAN ACTIVE';
     uploadedImg = null;
-    showToast('▸ CAMERA INITIALIZED');
-  } catch { showToast('▸ CAMERA ACCESS DENIED', true); }
+    showToast('👁 SHARINGAN AWAKENED');
+  } catch { showToast('👁 CAMERA ACCESS DENIED', true); }
 }
 
 function stopCamera() {
@@ -817,7 +1151,7 @@ function stopCamera() {
   document.getElementById('cameraWrap').classList.remove('active');
   document.getElementById('captureBtn').disabled = true;
   document.getElementById('autoBtn').disabled = true;
-  document.getElementById('autoBtn').textContent = '⟳ AUTO';
+  document.getElementById('autoBtn').textContent = '⟳ AUTO SCAN';
   document.getElementById('startBtn').style.display = 'inline-block';
   document.getElementById('stopBtn').style.display = 'none';
   document.getElementById('modeLabel').textContent = 'STANDBY';
@@ -858,13 +1192,8 @@ function handleFileUpload(e) {
 async function runDetection(blob, imgW, imgH) {
   document.getElementById('processing').classList.add('show');
   try {
-    const fd = new FormData();
-    fd.append('file', blob, 'img.jpg');
-    const res = await fetch(`${API()}/detect`, {
-      method: 'POST',
-      body: fd,
-      headers: NGROK_HEADERS   // ← bypass ngrok warning
-    });
+    const fd = new FormData(); fd.append('file', blob, 'img.jpg');
+    const res = await fetch(`${API()}/detect`, { method: 'POST', body: fd, headers: NGROK_HEADERS });
     const data = await res.json();
     const dets = data.detections || [];
     renderResults(dets);
@@ -874,10 +1203,10 @@ async function runDetection(blob, imgW, imgH) {
     if (dets.length > 0) {
       const confs = dets.map(d => d.confidence || d.match_score || 0);
       allConfs.push(...confs);
-      const avg = allConfs.reduce((a,b) => a+b,0) / allConfs.length;
-      document.getElementById('avgConf').textContent = Math.round(avg*100) + '%';
+      const avg = allConfs.reduce((a,b)=>a+b,0)/allConfs.length;
+      document.getElementById('avgConf').textContent = Math.round(avg*100)+'%';
     }
-  } catch { showToast('▸ DETECTION FAILED', true); }
+  } catch { showToast('🍃 DETECTION FAILED', true); }
   document.getElementById('processing').classList.remove('show');
 }
 
@@ -892,14 +1221,14 @@ function drawBoxes(dets, imgW, imgH) {
   }
   const v = document.getElementById('videoEl');
   if (v.style.display !== 'none') ctx.drawImage(v, 0, 0, canvas.width, canvas.height);
-  const sx = canvas.width / (imgW || canvas.width);
-  const sy = canvas.height / (imgH || canvas.height);
+  const sx = canvas.width/(imgW||canvas.width);
+  const sy = canvas.height/(imgH||canvas.height);
   dets.forEach(d => {
     if (!d.box || d.box.length < 4) return;
     const [x1,y1,x2,y2] = d.box;
-    const bx = x1*sx, by = y1*sy, bw = (x2-x1)*sx, bh = (y2-y1)*sy;
+    const bx=x1*sx, by=y1*sy, bw=(x2-x1)*sx, bh=(y2-y1)*sy;
     const isDino = d.detector === 'grounding_dino';
-    const color = isDino ? '#9b59f5' : '#00f5ff';
+    const color = isDino ? '#cc0000' : '#ff6b00';
     ctx.shadowBlur = 12; ctx.shadowColor = color;
     ctx.strokeStyle = color; ctx.lineWidth = 1.5;
     ctx.strokeRect(bx, by, bw, bh);
@@ -908,14 +1237,14 @@ function drawBoxes(dets, imgW, imgH) {
       ctx.beginPath(); ctx.moveTo(cx+dx*cs,cy); ctx.lineTo(cx,cy); ctx.lineTo(cx,cy+dy*cs); ctx.stroke();
     });
     ctx.shadowBlur = 0;
-    const conf = Math.round((d.confidence || d.match_score || 0)*100);
+    const conf = Math.round((d.confidence||d.match_score||0)*100);
     const label = `${d.label} ${conf}%`;
     ctx.font = 'bold 11px Orbitron, monospace';
     const tw = ctx.measureText(label).width;
-    ctx.fillStyle = color + 'dd';
-    ctx.fillRect(bx, by - 20, tw + 14, 19);
-    ctx.fillStyle = '#000';
-    ctx.fillText(label, bx + 7, by - 6);
+    ctx.fillStyle = color+'dd';
+    ctx.fillRect(bx, by-20, tw+14, 19);
+    ctx.fillStyle = '#fff';
+    ctx.fillText(label, bx+7, by-6);
   });
 }
 
@@ -929,70 +1258,55 @@ function toggleAuto() {
   isAuto = !isAuto;
   const btn = document.getElementById('autoBtn');
   if (isAuto) {
-    btn.textContent = '⏸ PAUSE'; btn.style.color = 'var(--cyan)';
+    btn.textContent = '⏸ PAUSE'; btn.style.color = 'var(--orange)';
     autoInterval = setInterval(captureAndDetect, 2000);
-    showToast('▸ AUTO SCAN ACTIVE — 2S INTERVAL');
+    showToast('🍃 AUTO SCAN — 2S INTERVAL');
   } else {
-    btn.textContent = '⟳ AUTO'; btn.style.color = '';
+    btn.textContent = '⟳ AUTO SCAN'; btn.style.color = '';
     clearInterval(autoInterval); autoInterval = null;
   }
 }
 
-// ── Add Object ────────────────────────────────────────────
 async function addObject() {
   const input = document.getElementById('newObjInput');
   const name = input.value.trim().toLowerCase(); if (!name) return;
   try {
-    const res = await fetch(`${API()}/add-object?name=${encodeURIComponent(name)}`, {
-      method: 'POST',
-      headers: NGROK_HEADERS   // ← bypass ngrok warning
-    });
+    const res = await fetch(`${API()}/add-object?name=${encodeURIComponent(name)}`, { method:'POST', headers:NGROK_HEADERS });
     const data = await res.json();
     registeredObjects = data.objects || registeredObjects;
     renderObjList(name);
     document.getElementById('totalObjects').textContent = registeredObjects.length;
     input.value = '';
-    showToast(`▸ TARGET LOCKED: "${name.toUpperCase()}"`);
-  } catch { showToast('▸ REGISTRATION FAILED', true); }
+    showToast(`🍃 TARGET LOCKED: "${name.toUpperCase()}"`);
+  } catch { showToast('🍃 REGISTRATION FAILED', true); }
 }
 
-// ── Remove Object ─────────────────────────────────────────
 async function removeObject(idx) {
   const name = registeredObjects[idx];
   try {
-    const res = await fetch(`${API()}/remove-object-by-index?index=${idx}`, {
-      method: 'DELETE',
-      headers: NGROK_HEADERS   // ← bypass ngrok warning
-    });
+    const res = await fetch(`${API()}/remove-object-by-index?index=${idx}`, { method:'DELETE', headers:NGROK_HEADERS });
     const data = await res.json();
     if (data.error) { showToast(data.error, true); return; }
     registeredObjects = data.objects || registeredObjects;
     renderObjList();
     document.getElementById('totalObjects').textContent = registeredObjects.length;
-    showToast(`▸ TARGET REMOVED: "${name.toUpperCase()}"`);
-  } catch { showToast('▸ REMOVAL FAILED', true); }
+    showToast(`🍃 TARGET REMOVED: "${name.toUpperCase()}"`);
+  } catch { showToast('🍃 REMOVAL FAILED', true); }
 }
 
-// ── Clear All ─────────────────────────────────────────────
 async function clearAll() {
   if (!confirm('PURGE ALL TARGETS FROM REGISTRY?')) return;
   for (let i = registeredObjects.length-1; i >= 0; i--) {
-    await fetch(`${API()}/remove-object-by-index?index=${i}`, {
-      method: 'DELETE',
-      headers: NGROK_HEADERS   // ← bypass ngrok warning
-    });
+    await fetch(`${API()}/remove-object-by-index?index=${i}`, { method:'DELETE', headers:NGROK_HEADERS });
   }
   registeredObjects = []; renderObjList();
   document.getElementById('totalObjects').textContent = 0;
-  showToast('▸ REGISTRY PURGED');
+  showToast('🍃 REGISTRY PURGED');
 }
 
-// ── Render Objects ────────────────────────────────────────
 function renderObjList(newName=null) {
   const c = document.getElementById('objList');
-  if (!registeredObjects.length) {
-    c.innerHTML = '<div class="no-result">NO TARGETS REGISTERED</div>'; return;
-  }
+  if (!registeredObjects.length) { c.innerHTML = '<div class="no-result">NO TARGETS REGISTERED</div>'; return; }
   c.innerHTML = registeredObjects.map((o,i) => `
     <div class="obj-row ${o===newName?'new':''}">
       <span class="obj-idx">${String(i).padStart(2,'0')}</span>
@@ -1002,7 +1316,6 @@ function renderObjList(newName=null) {
   `).join('');
 }
 
-// ── Render Results ────────────────────────────────────────
 function renderResults(dets) {
   const c = document.getElementById('resultsList');
   if (!dets.length) { c.innerHTML = '<div class="no-result">NO TARGETS DETECTED</div>'; return; }
@@ -1010,7 +1323,7 @@ function renderResults(dets) {
     const conf = Math.round((d.confidence||d.match_score||0)*100);
     const isDino = d.detector === 'grounding_dino';
     const r = 15, circ = 2*Math.PI*r;
-    const offset = circ - (conf/100)*circ;
+    const offset = circ-(conf/100)*circ;
     return `
       <div class="result-card ${isDino?'dino':'yolo'}">
         <div class="result-left">
@@ -1032,15 +1345,15 @@ function renderResults(dets) {
 }
 
 function clearResults() {
-  document.getElementById('resultsList').innerHTML = '<div class="no-result">AWAITING SCAN...</div>';
+  document.getElementById('resultsList').innerHTML = '<div class="no-result">AWAITING SHARINGAN SCAN...</div>';
   clearCanvas();
 }
 
 function showToast(msg, err=false) {
   const t = document.getElementById('toast');
   t.textContent = msg;
-  t.className = 'toast show' + (err?' err':'');
-  setTimeout(() => t.className='toast', 3000);
+  t.className = 'toast show'+(err?' err':'');
+  setTimeout(()=>t.className='toast', 3000);
 }
 
 window.onload = () => {
