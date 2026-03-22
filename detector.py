@@ -464,5 +464,41 @@ def detect_objects(image_path):
     if os.path.exists("temp_crop.jpg"):
         os.remove("temp_crop.jpg")
 
-    print(f"[DETECT] Total: {len(detections)} detections")
+    detections = remove_duplicates(detections, iou_threshold=0.5)
+    print(f"[DETECT] After dedup: {len(detections)} detections")
     return detections
+def remove_duplicates(detections, iou_threshold=0.5):
+    """Remove duplicate detections from YOLO and DINO"""
+    if not detections:
+        return detections
+
+    final = []
+    for det in detections:
+        is_duplicate = False
+        for kept in final:
+            # Check if same label
+            if det['label'] == kept['label']:
+                # Calculate IoU
+                b1 = det['box']
+                b2 = kept['box']
+                # Intersection
+                ix1 = max(b1[0], b2[0])
+                iy1 = max(b1[1], b2[1])
+                ix2 = min(b1[2], b2[2])
+                iy2 = min(b1[3], b2[3])
+                if ix2 > ix1 and iy2 > iy1:
+                    intersection = (ix2-ix1) * (iy2-iy1)
+                    area1 = (b1[2]-b1[0]) * (b1[3]-b1[1])
+                    area2 = (b2[2]-b2[0]) * (b2[3]-b2[1])
+                    union = area1 + area2 - intersection
+                    iou = intersection / union if union > 0 else 0
+                    if iou > iou_threshold:
+                        is_duplicate = True
+                        # Keep higher confidence one
+                        if det['confidence'] > kept['confidence']:
+                            final.remove(kept)
+                            final.append(det)
+                        break
+        if not is_duplicate:
+            final.append(det)
+    return final
