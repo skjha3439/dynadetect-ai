@@ -1213,38 +1213,63 @@ async function runDetection(blob, imgW, imgH) {
 function drawBoxes(dets, imgW, imgH) {
   const canvas = document.getElementById('canvasEl');
   const wrap = document.getElementById('cameraWrap');
-  canvas.width = wrap.offsetWidth; canvas.height = wrap.offsetHeight;
+  canvas.width = wrap.offsetWidth;
+  canvas.height = wrap.offsetHeight;
   const ctx = canvas.getContext('2d');
+
+  // Draw uploaded image
   if (uploadedImg) {
     ctx.drawImage(uploadedImg, uploadedX, uploadedY,
-      uploadedImg.width * uploadedScale, uploadedImg.height * uploadedScale);
+      uploadedImg.width * uploadedScale,
+      uploadedImg.height * uploadedScale);
   }
+
+  // Draw video frame
   const v = document.getElementById('videoEl');
   if (v.style.display !== 'none') ctx.drawImage(v, 0, 0, canvas.width, canvas.height);
-  const sx = canvas.width/(imgW||canvas.width);
-  const sy = canvas.height/(imgH||canvas.height);
+
   dets.forEach(d => {
     if (!d.box || d.box.length < 4) return;
-    const [x1,y1,x2,y2] = d.box;
-    const bx=x1*sx, by=y1*sy, bw=(x2-x1)*sx, bh=(y2-y1)*sy;
+    const [x1, y1, x2, y2] = d.box;
+
+    // ── FIXED: Apply image offset + scale for uploaded images ──
+    let bx, by, bw, bh;
+    if (uploadedImg) {
+      // Use actual scale and offset from uploaded image
+      bx = uploadedX + x1 * uploadedScale;
+      by = uploadedY + y1 * uploadedScale;
+      bw = (x2 - x1) * uploadedScale;
+      bh = (y2 - y1) * uploadedScale;
+    } else {
+      // Camera — scale to canvas size
+      const sx = canvas.width / (imgW || canvas.width);
+      const sy = canvas.height / (imgH || canvas.height);
+      bx = x1 * sx; by = y1 * sy;
+      bw = (x2 - x1) * sx; bh = (y2 - y1) * sy;
+    }
+
     const isDino = d.detector === 'grounding_dino';
     const color = isDino ? '#cc0000' : '#ff6b00';
     ctx.shadowBlur = 12; ctx.shadowColor = color;
     ctx.strokeStyle = color; ctx.lineWidth = 1.5;
     ctx.strokeRect(bx, by, bw, bh);
+
+    // Corner accents
     const cs = 12; ctx.lineWidth = 2.5;
     [[bx,by,1,1],[bx+bw,by,-1,1],[bx,by+bh,1,-1],[bx+bw,by+bh,-1,-1]].forEach(([cx,cy,dx,dy]) => {
       ctx.beginPath(); ctx.moveTo(cx+dx*cs,cy); ctx.lineTo(cx,cy); ctx.lineTo(cx,cy+dy*cs); ctx.stroke();
     });
     ctx.shadowBlur = 0;
-    const conf = Math.round((d.confidence||d.match_score||0)*100);
+
+    // Label
+    const conf = Math.round((d.confidence || d.match_score || 0) * 100);
     const label = `${d.label} ${conf}%`;
     ctx.font = 'bold 11px Orbitron, monospace';
     const tw = ctx.measureText(label).width;
-    ctx.fillStyle = color+'dd';
-    ctx.fillRect(bx, by-20, tw+14, 19);
+    ctx.fillStyle = color + 'dd';
+    ctx.fillRect(bx, by - 20, tw + 14, 19);
     ctx.fillStyle = '#fff';
-    ctx.fillText(label, bx+7, by-6);
+    ctx.fillText(label, bx + 7, by - 6);
   });
 }
 
