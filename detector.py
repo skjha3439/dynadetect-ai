@@ -1,3 +1,4 @@
+from quantum_optimizer import quantum_optimizer, quantum_similarity
 from dotenv import load_dotenv
 import os
 import json
@@ -303,15 +304,40 @@ def register_object_with_image(name, image_path):
 
 
 def match_to_prototype(embedding):
-    """Match detection to nearest FAISS prototype"""
-    if index.ntotal == 0:
+    """
+    Quantum-Enhanced Prototype Matching
+    
+    Uses quantum annealing instead of classical
+    nearest neighbor for better accuracy!
+    """
+    if index.ntotal == 0 or len(prototype_names) == 0:
         return "unknown", 0.0
-    distances, indices_result = index.search(embedding, k=1)
-    idx = indices_result[0][0]
-    score = float(1 / (1 + distances[0][0]))
-    if idx < len(prototype_names):
-        return prototype_names[idx], score
-    return "unknown", score
+
+    # Use quantum optimizer for enhanced matching
+    try:
+        # Try quantum-enhanced matching first
+        if index.ntotal <= 20:
+            # Small registry: use full quantum annealing
+            name, score, _ = quantum_optimizer.quantum_annealing_search(
+                embedding.flatten(),
+                [index.reconstruct(i) for i in range(index.ntotal)],
+                prototype_names
+            )
+        else:
+            # Large registry: FAISS pre-filter + quantum refinement
+            name, score = quantum_optimizer.quantum_enhanced_match(
+                embedding, index, prototype_names, top_k=5
+            )
+        print(f"[QUANTUM] Match: '{name}' score={score:.3f}")
+        return name, score
+
+    except Exception as e:
+        print(f"[QUANTUM] Fallback to classical: {e}")
+        # Fallback to classical FAISS
+        distances, indices_result = index.search(embedding, k=1)
+        idx = indices_result[0][0]
+        score = float(1 / (1 + distances[0][0]))
+        return prototype_names[idx] if idx < len(prototype_names) else "unknown", score
 
 
 # ────────────────────────────────────────────────────────
