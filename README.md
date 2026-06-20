@@ -1,4 +1,4 @@
-# 👁️ DynaDetect AI — Hidden Leaf Vision System 🍃
+# DynaDetect AI — Hidden Leaf Vision System
 
 > **Advanced Zero-Shot Object Detection & Target Registry Portal**
 
@@ -6,7 +6,7 @@ DynaDetect AI is a dynamic computer vision application built to mimic the analyt
 
 ---
 
-## 🚀 Key Features
+##  Key Features
 
 * **Sharingan Vision Interface:** A highly responsive, custom-designed frontend dashboard built with HTML, CSS, and Vanilla JavaScript.
 * **Zero-Shot Object Detection:** Utilizes **Grounding DINO** to detect and track any object purely based on text prompts—no rigid pre-training categories required.
@@ -16,7 +16,7 @@ DynaDetect AI is a dynamic computer vision application built to mimic the analyt
 
 ---
 
-## 🛠️ Tech Stack
+##  Tech Stack
 
 **Frontend:**
 * HTML5 / CSS3
@@ -32,7 +32,7 @@ DynaDetect AI is a dynamic computer vision application built to mimic the analyt
 
 ---
 
-## ⚙️ Local Installation & Setup
+##  Local Installation & Setup
 
 Since this project relies on heavy AI models (YOLO, Grounding DINO) and a FastAPI backend, the web server needs to run locally to process the video/image feeds. 
 
